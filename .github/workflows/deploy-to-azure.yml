@@ -31,7 +31,7 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     - name: Publish
-      run: dotnet publish IspManagementERP.Server/IspManagementERP.Server.csproj --configuration Release --output ./publish
+      run: dotnet publish IspManagementERP/IspManagementERP.Server/IspManagementERP.Server.csproj --configuration Release --output ./publish
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
