@@ -40,3 +40,10 @@ IspManagementERP/
 - Versionar en GitHub.
 - Configurar Azure y CI/CD.
 -
+## subir por primera vez a GITHUB
+### Comandos
+- git init
+- git add .
+- git commit -m "Initial commit: Blazor WASM Hosted (.NET 7) ERP solution with doc"
+- git remote add origin https://github.com/carlorodriguezara/IspManagementERP.git
+- git push -u origin main

@@ -1,0 +1,55 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Mono Auto Generated Files
+mono_crash.*
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Visual Studio 2015/2017/2019/2022 cache/options directory
+.vs/
+.vscode/
+
+# Visual Studio 2017 auto generated files
+Generated\ Files/
+
+# DotCover
+.idea/
+*.dotCover
+
+# Rider
+.idea/
+*.sln.iml
+
+# Others
+*.dbmdl
+*.bak
+*.backup
+*.log
+*.vspscc
+*.vssscc
+*.ncb
+*.sdf
+*.cachefile
+*.db
+*.psess
+*.vsp
+*.pdb
+
+# Entity Framework
+Migrations/
+
+# Azure Functions local settings file
+local.settings.json
+
+# Others
+*.swp
