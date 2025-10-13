@@ -847,8 +847,8 @@ E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\refint\IspManagemen
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\IspManagementERP.Client.pdb
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\ref\IspManagementERP.Client.dll
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\IspManagementERP.Client.sourcelink.json
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\cplf5umlm7-asv8r6ei4v.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\jbpqarclpl-glsn8opgxw.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\evjr29yy5v-ig5wwpcvt4.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\o54a1kzrbc-lfwfch67x6.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\tt4pxv8ehc-jjqpjuus2l.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\cplf5umlm7-331eazjbzk.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\jbpqarclpl-45tlcrj0yn.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\evjr29yy5v-vjjgp7m4ac.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\o54a1kzrbc-cuo6ir4dsd.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\tt4pxv8ehc-exx3gqhokp.gz

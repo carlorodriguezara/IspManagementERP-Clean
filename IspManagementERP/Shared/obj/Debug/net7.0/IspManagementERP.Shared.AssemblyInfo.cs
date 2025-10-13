@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("IspManagementERP.Shared")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6e3fcef98bfea51fe3cb8de1a4041f2403af070e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4f4bdff240aaba29f81011249c41bb6c8e7ba117")]
 [assembly: System.Reflection.AssemblyProductAttribute("IspManagementERP.Shared")]
 [assembly: System.Reflection.AssemblyTitleAttribute("IspManagementERP.Shared")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
