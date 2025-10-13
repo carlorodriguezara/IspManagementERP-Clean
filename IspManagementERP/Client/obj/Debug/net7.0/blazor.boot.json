@@ -1,7 +1,7 @@
 {
   "entryAssembly": "IspManagementERP.Client",
   "resources": {
-    "hash": "sha256-ACM65LS8PJip8fywXdnBfpPfEip4JfKmzmiL+LPnYjQ=",
+    "hash": "sha256-qyfTuer3IzN73OIJ5ptpDRUwW4Aw6q+FKDmWmMXQP6c=",
     "runtime": {
       "dotnet.js": "sha256-eaJTmow4t8eE7FZMZR5Ja41JMOefGCbIYDTdpclGsac=",
       "dotnet.timezones.blat": "sha256-gbATD5HDsHYtW8vdPYh9iSBY4O5CjvMeCSF5xXWF1xo=",
@@ -206,12 +206,12 @@
       "mscorlib.dll": "sha256-HYyp9hO+GKFyupcEiY1PxtBBXbHzefsO3Q8RiQTaNCA=",
       "netstandard.dll": "sha256-N5CcC3sLzGBesbmeJAp5bwxABN9u7SwkIO5qfFjzoik=",
       "System.Private.CoreLib.dll": "sha256-bJS1DJmhjP7PvegYG+Z8O9EDtRY78HKinA3LUMVLlSQ=",
-      "IspManagementERP.Shared.dll": "sha256-AV2D0juUIr+d/KVE9U7zqD2bF/qj7U1YR280x8c+H9I=",
-      "IspManagementERP.Client.dll": "sha256-BaSqZGSIspD4vj5L48lfqnnrKFq/1y/KzTQMXnGE02s="
+      "IspManagementERP.Shared.dll": "sha256-D6fdp5EyFySzf4znx5sweOGvc3PaIL4lxnt8a5gnUWU=",
+      "IspManagementERP.Client.dll": "sha256-qaTnjbn9TUG2WFMuY8papiaRqhLicdiW77H/oJJQJJA="
     },
     "pdb": {
-      "IspManagementERP.Shared.pdb": "sha256-yI7+OPzZp/NRAYCFCDTLqDwaWCBr5XNczxMltPmLxgA=",
-      "IspManagementERP.Client.pdb": "sha256-ROH29w59F/sHmg94nSyWdZOL1Jm09O87zPAuOAJlpG8="
+      "IspManagementERP.Shared.pdb": "sha256-YoekfxXp2XnRbkHwhBtqcUhCCavglkLn0TZEcwYPrBE=",
+      "IspManagementERP.Client.pdb": "sha256-CMeF88w0NgTNMM3W7VFBuCrRUuV6s4mWsOKn5UWubK4="
     },
     "runtimeAssets": {
       "dotnet.wasm": {

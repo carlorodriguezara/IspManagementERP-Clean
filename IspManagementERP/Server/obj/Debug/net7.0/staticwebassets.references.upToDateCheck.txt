@@ -1,1 +1,2 @@
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
