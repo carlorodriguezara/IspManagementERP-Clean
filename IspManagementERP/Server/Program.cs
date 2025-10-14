@@ -1,6 +1,8 @@
 using IspManagementERP.Server.Data;
 using IspManagementERP.Server.Models;
+using IspManagementERP.Server.Service;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +16,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
 
 builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
@@ -24,6 +28,9 @@ builder.Services.AddAuthentication()
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+//Seed identity data
+builder.Services.AddScoped<IdentityDataSeeder>();
 
 var app = builder.Build();
 
@@ -60,6 +67,16 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
+}
+
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<IdentityDataSeeder>();
+    // Puedes cambiar estos valores si quieres otros credenciales demo:
+    var adminEmail = "admin@local.test";
+    var adminPwd = "AdminPassword123!";
+    await seeder.SeedAsync(adminEmail, adminPwd, createAdmin: true);
 }
 
 app.Run();
