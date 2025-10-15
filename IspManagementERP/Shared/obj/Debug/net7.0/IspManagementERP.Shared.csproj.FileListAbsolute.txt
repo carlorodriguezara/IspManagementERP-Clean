@@ -10,3 +10,15 @@ E:\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\IspManagementERP.Sh
 E:\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\refint\IspManagementERP.Shared.dll
 E:\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\IspManagementERP.Shared.pdb
 E:\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\ref\IspManagementERP.Shared.dll
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\bin\Debug\net7.0\IspManagementERP.Shared.deps.json
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\bin\Debug\net7.0\IspManagementERP.Shared.dll
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\bin\Debug\net7.0\IspManagementERP.Shared.pdb
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\IspManagementERP.Shared.GeneratedMSBuildEditorConfig.editorconfig
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\IspManagementERP.Shared.AssemblyInfoInputs.cache
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\IspManagementERP.Shared.AssemblyInfo.cs
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\IspManagementERP.Shared.csproj.CoreCompileInputs.cache
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\IspManagementERP.Shared.sourcelink.json
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\IspManagementERP.Shared.dll
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\refint\IspManagementERP.Shared.dll
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\IspManagementERP.Shared.pdb
+D:\Desarrollo\IspManagementERP\IspManagementERP\Shared\obj\Debug\net7.0\ref\IspManagementERP.Shared.dll

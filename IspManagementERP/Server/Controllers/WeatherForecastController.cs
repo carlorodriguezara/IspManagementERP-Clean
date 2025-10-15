@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IspManagementERP.Server.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "CanViewReports")]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase

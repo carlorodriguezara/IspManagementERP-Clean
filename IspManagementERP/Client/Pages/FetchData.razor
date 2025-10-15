@@ -10,8 +10,11 @@
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from the server.</p>
-
-@if (forecasts == null)
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-warning">@errorMessage</div>
+}
+else if (forecasts == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -42,6 +45,7 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,9 +53,13 @@ else
         {
             forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
         }
-        catch (AccessTokenNotAvailableException exception)
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
         {
-            exception.Redirect();
+            errorMessage = "No tienes permisos para ver esta información.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Ocurrió un error inesperado.";
         }
     }
 }

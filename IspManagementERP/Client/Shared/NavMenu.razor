@@ -20,9 +20,17 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
+           @*  <NavLink class="nav-link" href="fetchdata">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
+            </NavLink> *@
+
+            <AuthorizeView Policy="CanViewReports">
+                <Authorized>
+                    <NavLink href="fetchdata" Match="NavLinkMatch.All">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+                    </NavLink>
+                </Authorized>
+            </AuthorizeView>
         </div>
     </nav>
 </div>
