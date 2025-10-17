@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,7 +62,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -74,7 +75,6 @@ app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthorization();
 
-
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
@@ -86,15 +86,4 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var seeder = scope.ServiceProvider.GetRequiredService<IdentityDataSeeder>();
-    // Puedes cambiar estos valores si quieres otros credenciales demo:
-    var adminEmail = "admin@local.test";
-    var adminPwd = "AdminPassword123!";
-    await seeder.SeedAsync(adminEmail, adminPwd, createAdmin: true);
-}
-
 app.Run();
-

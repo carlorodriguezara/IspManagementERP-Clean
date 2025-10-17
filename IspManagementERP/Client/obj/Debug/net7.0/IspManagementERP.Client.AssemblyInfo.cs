@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("IspManagementERP.Client")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+17b025862061d53fa777ef5377ea92fb14b18d1c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a4e11ea0cf78ae59d9aa7d9ea22a1f90ef9c99ab")]
 [assembly: System.Reflection.AssemblyProductAttribute("IspManagementERP.Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("IspManagementERP.Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

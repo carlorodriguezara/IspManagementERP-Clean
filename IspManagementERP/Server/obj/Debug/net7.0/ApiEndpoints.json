@@ -8,19 +8,9 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "type",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "value",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "dto",
+        "Type": "IspManagementERP.Server.Models.AddClaimDto",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
@@ -34,14 +24,9 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "role",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "dto",
+        "Type": "IspManagementERP.Server.Models.AssignRoleDto",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
@@ -55,9 +40,9 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "role",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "dto",
+        "Type": "IspManagementERP.Server.Models.AssignRoleDto",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
@@ -71,19 +56,9 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "type",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "value",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "dto",
+        "Type": "IspManagementERP.Server.Models.AddClaimDto",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
@@ -97,14 +72,9 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "role",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "dto",
+        "Type": "IspManagementERP.Server.Models.AssignRoleDto",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
@@ -123,6 +93,16 @@
     "ContainingType": "IspManagementERP.Server.Controllers.AdminController",
     "Method": "GetUsers",
     "RelativePath": "api/Admin/users",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "IspManagementERP.Server.Controllers.MeController",
+    "Method": "GetPermissions",
+    "RelativePath": "api/Me/permissions",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

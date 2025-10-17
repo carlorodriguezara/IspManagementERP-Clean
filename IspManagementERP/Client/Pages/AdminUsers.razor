@@ -102,14 +102,24 @@ else
         await AddClaimAsync(userId, "permission", "reports.view");
     }
 
-    // Funciones que llaman a la API
+    // Funciones que llaman a la API - envían JSON en el body
     private async Task AssignRoleAsync(string userId, string role)
     {
         try
         {
-            var r = await Http.PostAsync($"api/admin/assign-role?userId={Uri.EscapeDataString(userId)}&role={Uri.EscapeDataString(role)}", null);
-            if (r.IsSuccessStatusCode) await LoadUsers();
-            else error = $"AssignRole error: {r.StatusCode}";
+            var dto = new { UserId = userId, Role = role };
+            var r = await Http.PostAsJsonAsync("api/admin/assign-role", dto);
+            if (r.IsSuccessStatusCode)
+            {
+                await LoadUsers();
+                error = null;
+            }
+            else
+            {
+                // intenta leer mensaje de error del servidor
+                var body = await r.Content.ReadAsStringAsync();
+                error = $"AssignRole error: {r.StatusCode} - {body}";
+            }
         }
         catch (Exception ex) { error = ex.Message; }
     }
@@ -118,9 +128,18 @@ else
     {
         try
         {
-            var r = await Http.PostAsync($"api/admin/add-claim?userId={Uri.EscapeDataString(userId)}&type={Uri.EscapeDataString(type)}&value={Uri.EscapeDataString(value)}", null);
-            if (r.IsSuccessStatusCode) await LoadUsers();
-            else error = $"AddClaim error: {r.StatusCode}";
+            var dto = new { UserId = userId, Type = type, Value = value };
+            var r = await Http.PostAsJsonAsync("api/admin/add-claim", dto);
+            if (r.IsSuccessStatusCode)
+            {
+                await LoadUsers();
+                error = null;
+            }
+            else
+            {
+                var body = await r.Content.ReadAsStringAsync();
+                error = $"AddClaim error: {r.StatusCode} - {body}";
+            }
         }
         catch (Exception ex) { error = ex.Message; }
     }

@@ -27,3 +27,16 @@ D:\Desarrollo\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwe
 D:\Desarrollo\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
 D:\Desarrollo\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
 D:\Desarrollo\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json

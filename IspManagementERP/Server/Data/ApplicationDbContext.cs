@@ -13,5 +13,6 @@ namespace IspManagementERP.Server.Data
             IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
         {
         }
+        public DbSet<AuditEntry> AuditEntries { get; set; }
     }
 }
