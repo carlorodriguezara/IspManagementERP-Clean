@@ -241,10 +241,10 @@ E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\staticwebassets.bui
 E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\staticwebassets.build.json.cache
 E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\staticwebassets.development.json
 E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\staticwebassets.build.endpoints.json
+E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\staticwebassets.upToDateCheck.txt
 E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\IspManag.9E06DD18.Up2Date
 E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\IspManagementERP.Server.dll
 E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\refint\IspManagementERP.Server.dll
 E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\IspManagementERP.Server.pdb
 E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\IspManagementERP.Server.genruntimeconfig.cache
 E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\ref\IspManagementERP.Server.dll
-E:\IspManagementERP\IspManagementERP\Server\obj\Debug\net7.0\staticwebassets.upToDateCheck.txt

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Microsoft.Extensions.DependencyInjection;
+using Duende.IdentityServer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("CanManageUsers", policy =>
@@ -48,8 +50,11 @@ builder.Services.AddAuthentication()
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-//Seed identity data
+//Seed identity data kept registered but NOT executed automatically
 builder.Services.AddScoped<IdentityDataSeeder>();
+
+// Registrar ProfileService (si lo usas)
+builder.Services.AddScoped<Duende.IdentityServer.Services.IProfileService, IspManagementERP.Server.Service.ProfileService>();
 
 var app = builder.Build();
 
@@ -72,7 +77,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// IMPORTANT: order matters
 app.UseIdentityServer();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
@@ -85,5 +92,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
 }
+
+// NOTE: Dev seeding removed from automatic startup. Run IdentityDataSeeder manually if needed.
 
 app.Run();
