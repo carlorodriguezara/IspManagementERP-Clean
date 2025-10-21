@@ -1,7 +1,12 @@
 using IspManagementERP.Client;
+using IspManagementERP.Client.Services.Identity;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.AspNetCore.Components.WebAssembly.Http; // necesario para FetchCredentialsOption
+using System.Net.Http;
+using MudBlazor.Services;
+
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -35,6 +40,26 @@ builder.Services.AddAuthorizationCore(options =>
             ctx.User.IsInRole("Admin") ||
             ctx.User.IsInRole("Manager") ||
             ctx.User.HasClaim(c => c.Type == "permission" && c.Value == "reports.view")));
+});
+
+
+
+// Añadir en Client/Program.cs, junto a builder.Services...
+builder.Services.AddSingleton<IspManagementERP.Client.Services.ToastService>();
+// Después de haber registrado/factory del HttpClient de la plantilla
+builder.Services.AddScoped<UserService>(sp =>
+{
+    var client = sp.GetRequiredService<IHttpClientFactory>().CreateClient("IspManagementERP.ServerAPI");
+    return new UserService(client);
+});
+
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = MudBlazor.MudBlazorDefaults.SnackbarPosition.BottomRight;
+    config.SnackbarConfiguration.PreventDuplicates = false;
+    config.SnackbarConfiguration.NewestOnTop = false;
+    config.SnackbarConfiguration.ShowCloseIcon = true;
+    config.SnackbarConfiguration.VisibleStateDuration = 3500;
 });
 
 await builder.Build().RunAsync();

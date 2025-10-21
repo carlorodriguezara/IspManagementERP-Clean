@@ -1,0 +1,205 @@
+﻿@namespace IspManagementERP.Client.Shared
+@using IspManagementERP.Shared.Identity
+@inject IspManagementERP.Client.Services.Identity.UserService UserService
+
+<div class="@ModalClass" tabindex="-1" style="display:@(Visible ? "block" : "none")" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Claims — @UserEmail</h5>
+                <button type="button" class="btn-close" aria-label="Cerrar" @onclick="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <h6>Asignados</h6>
+
+                @if (IsLoading)
+                {
+                    <div>Cargando...</div>
+                }
+                else if (UserClaims == null || !UserClaims.Any())
+                {
+                    <div class="text-muted">No tiene claims.</div>
+                }
+                else
+                {
+                    @foreach (var c in UserClaims)
+                    {
+                        var type = c.Key;
+                        var value = c.Value;
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                            <div>
+                                <strong>@type</strong>: @value
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => OnRemoveClaimClicked(type, value)" disabled="@IsProcessing">Quitar</button>
+                            </div>
+                        </div>
+                    }
+                }
+
+                <h6 class="mt-3">Disponibles</h6>
+                @if (AvailableClaims == null || !AvailableClaims.Any())
+                {
+                    <div class="text-muted">No hay claims disponibles.</div>
+                }
+                else
+                {
+                    @foreach (var ac in AvailableClaims)
+                    {
+                        var t = ac.Key;
+                        var v = ac.Value;
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                            <div>
+                                <strong>@t</strong>: @v
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" @onclick="() => OnAssignAvailableClaimClicked(t, v)" disabled="@IsProcessing">Asignar</button>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @* Nuevo: botón para abrir la gestión de definiciones (AdminClaimsModal) *@
+                <div class="mt-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="OpenClaimDefinitions" disabled="@IsProcessing">
+                        Gestionar definiciones de claims
+                    </button>
+                    <small class="text-muted d-block mt-1">Si falta una definición, créala desde el panel de definiciones.</small>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Error))
+                {
+                    <div class="alert alert-danger mt-2" style="white-space:pre-wrap">@Error</div>
+                }
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="Close" disabled="@IsProcessing">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnOpenClaimDefinitions { get; set; }
+    private bool Visible;
+    private bool IsLoading;
+    private bool IsProcessing;
+    private string UserId = "";
+    private string UserEmail = "";
+    private List<KeyValuePair<string, string>> UserClaims = new();
+    private List<KeyValuePair<string, string>> AvailableClaims = new();
+    private string? Error;
+
+    private string ModalClass => Visible ? "modal fade show d-block" : "modal fade";
+
+    public async Task ShowAsync(string userId, string email)
+    {
+        Error = null;
+        UserId = userId ?? "";
+        UserEmail = email ?? "";
+        Visible = true;
+        await LoadAll();
+        StateHasChanged();
+    }
+
+    public void Close()
+    {
+        Visible = false;
+        Error = null;
+        StateHasChanged();
+    }
+
+    private async Task LoadAll()
+    {
+        try
+        {
+            IsLoading = true;
+            Error = null;
+
+            var claims = await UserService.GetUserClaimsAsync(UserId);
+            UserClaims = claims?.Select(kv => new KeyValuePair<string, string>(kv.Key, kv.Value)).ToList() ?? new List<KeyValuePair<string, string>>();
+
+            var defs = await UserService.GetClaimDefinitionsAsync();
+            AvailableClaims = defs.Select(d => new KeyValuePair<string, string>(d.Type, d.Value)).ToList();
+
+            var assignedSet = new HashSet<string>(UserClaims.Select(c => $"{c.Key}::{c.Value}"));
+            AvailableClaims = AvailableClaims.Where(a => !assignedSet.Contains($"{a.Key}::{a.Value}")).ToList();
+        }
+        catch (Exception ex)
+        {
+            Error = "Error cargando claims: " + ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task OnAssignAvailableClaimClicked(string type, string value)
+    {
+        try
+        {
+            IsProcessing = true;
+            Error = null;
+            var resp = await UserService.AddUserClaimAsync(UserId, new KeyValuePair<string, string>(type, value));
+            var body = await resp.Content.ReadAsStringAsync();
+            if (!resp.IsSuccessStatusCode)
+            {
+                Error = $"Error asignando claim: {resp.StatusCode} - {body}";
+                return;
+            }
+            await LoadAll();
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+
+    private async Task OnRemoveClaimClicked(string type, string value)
+    {
+        try
+        {
+            IsProcessing = true;
+            Error = null;
+            var resp = await UserService.RemoveUserClaimAsync(UserId, type, value);
+            var body = await resp.Content.ReadAsStringAsync();
+            if (!resp.IsSuccessStatusCode)
+            {
+                Error = $"Error quitando claim: {resp.StatusCode} - {body}";
+                return;
+            }
+            await LoadAll();
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+
+    private async Task OpenClaimDefinitions()
+    {
+        // Si el padre inyectó el callback, llámalo
+        if (OnOpenClaimDefinitions.HasDelegate)
+        {
+            await OnOpenClaimDefinitions.InvokeAsync(null);
+            return;
+        }
+
+        // Si no hay handler, navegar a la página (fallback)
+        NavigationManager.NavigateTo("/admin/claimdefinitions");
+    }
+
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
+}

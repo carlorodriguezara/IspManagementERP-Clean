@@ -3,6 +3,9 @@ build_property.EnableAotAnalyzer =
 build_property.EnableSingleFileAnalyzer = 
 build_property.EnableTrimAnalyzer = false
 build_property.IncludeAllContentForSelfExtract = 
+build_property.MudDebugAnalyzer = 
+build_property.MudAllowedAttributePattern = 
+build_property.MudIllegalParameters = 
 build_property.TargetFramework = net7.0
 build_property.TargetPlatformMinVersion = 
 build_property.UsingMicrosoftNETSdkWeb = 
@@ -28,10 +31,6 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IspManagementERP/IspManagementERP/Client/Pages/AdminUsers.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5Vc2Vycy5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
 [E:/IspManagementERP/IspManagementERP/Client/Pages/Authentication.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aGVudGljYXRpb24ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
@@ -44,8 +43,40 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRmV0Y2hEYXRhLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/IspManagementERP/IspManagementERP/Client/Pages/Identity/AdminClaims.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcQWRtaW5DbGFpbXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IspManagementERP/IspManagementERP/Client/Pages/Identity/AdminUsers.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcQWRtaW5Vc2Vycy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IspManagementERP/IspManagementERP/Client/Pages/Identity/ClaimsModal.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcQ2xhaW1zTW9kYWwucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IspManagementERP/IspManagementERP/Client/Pages/Identity/DeleteConfirm.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcRGVsZXRlQ29uZmlybS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IspManagementERP/IspManagementERP/Client/Pages/Identity/EditUserModal.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcRWRpdFVzZXJNb2RhbC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IspManagementERP/IspManagementERP/Client/Pages/Identity/RoleAssignModal.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcUm9sZUFzc2lnbk1vZGFsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/IspManagementERP/IspManagementERP/Client/Pages/Index.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXgucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IspManagementERP/IspManagementERP/Client/Shared/ActionsModal.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEFjdGlvbnNNb2RhbC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IspManagementERP/IspManagementERP/Client/Shared/ConfirmModal.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXENvbmZpcm1Nb2RhbC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/IspManagementERP/IspManagementERP/Client/Shared/LoginDisplay.razor]
@@ -58,6 +89,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/IspManagementERP/IspManagementERP/Client/Shared/SurveyPrompt.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFN1cnZleVByb21wdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IspManagementERP/IspManagementERP/Client/Shared/Toast.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFRvYXN0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/IspManagementERP/IspManagementERP/Client/_Imports.razor]

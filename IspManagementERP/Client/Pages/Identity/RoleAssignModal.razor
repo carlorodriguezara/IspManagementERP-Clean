@@ -1,0 +1,172 @@
+﻿@namespace IspManagementERP.Client.Shared
+@inject IspManagementERP.Client.Services.Identity.UserService UserService
+
+<div class="@ModalClass" tabindex="-1" style="display:@(Visible ? "block" : "none")" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Roles — @UserEmail</h5>
+                <button type="button" class="btn-close" aria-label="Cerrar" @onclick="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <h6>Asignados</h6>
+
+                @if (IsLoading)
+                {
+                    <div>Cargando...</div>
+                }
+                else if (UserRoles == null || !UserRoles.Any())
+                {
+                    <div class="text-muted">No tiene roles.</div>
+                }
+                else
+                {
+                    @foreach (var r in UserRoles)
+                    {
+                        var roleName = r; // captura local para evitar closure bug
+                                          <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                                              <div>@roleName</div>
+                                              <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => OnRemoveRoleClicked(roleName)" disabled="@IsProcessing">Quitar</button>
+                                          </div>
+                    }
+                }
+
+                <h6 class="mt-3">Disponibles</h6>
+
+                @if (AllRoles == null || !AllRoles.Any())
+                {
+                    <div class="text-muted">No roles definidos.</div>
+                }
+                else
+                {
+                    foreach (var r in AllRoles.Except(UserRoles ?? Enumerable.Empty<string>()))
+                    {
+                        var roleName = r;
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                            <div>@roleName</div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" @onclick="() => OnAddRoleClicked(roleName)" disabled="@IsProcessing">Asignar</button>
+                        </div>
+                    }
+                }
+
+                @if (!string.IsNullOrEmpty(Error))
+                {
+                    <div class="alert alert-danger mt-2" style="white-space:pre-wrap">@Error</div>
+                }
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="Close" disabled="@IsProcessing">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool Visible;
+    private bool IsLoading;
+    private bool IsProcessing;
+    private string UserId = "";
+    private string UserEmail = "";
+    private HashSet<string> UserRoles = new();
+    private List<string> AllRoles = new();
+    private string? Error;
+
+    private string ModalClass => Visible ? "modal fade show d-block" : "modal fade";
+
+    // Método público llamado por AdminUsers.razor (referencia)
+    public async Task ShowAsync(string userId, string email, string? userName = "")
+    {
+        Error = null;
+        UserId = userId ?? "";
+        UserEmail = email ?? userName ?? "";
+        Visible = true;
+        await LoadRolesOnly();   // SOLO GET — ninguna operación de escritura aquí
+        StateHasChanged();
+    }
+
+    private void Close()
+    {
+        Visible = false;
+        Error = null;
+        StateHasChanged();
+    }
+
+    // Carga únicamente (GET)
+    private async Task LoadRolesOnly()
+    {
+        try
+        {
+            IsLoading = true;
+            Error = null;
+
+            // Cargar todos los roles y roles del usuario desde el servicio cliente (GETs)
+            AllRoles = (await UserService.GetRolesAsync()).ToList();
+            var ur = await UserService.GetUserRolesAsync(UserId);
+            UserRoles = new HashSet<string>(ur ?? Enumerable.Empty<string>());
+        }
+        catch (Exception ex)
+        {
+            Error = "Error cargando roles: " + ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    // Handler para asignar rol (ejecuta POST)
+    private async Task OnAddRoleClicked(string role)
+    {
+        try
+        {
+            IsProcessing = true;
+            Error = null;
+            var resp = await UserService.AddUserRoleAsync(UserId, role);
+            var text = await resp.Content.ReadAsStringAsync();
+            if (!resp.IsSuccessStatusCode)
+            {
+                Error = $"Error asignando rol: {resp.StatusCode} - {text}";
+                return;
+            }
+            await LoadRolesOnly();
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+
+    // Handler para quitar rol (ejecuta DELETE) — SOLO se ejecuta al hacer click
+    private async Task OnRemoveRoleClicked(string role)
+    {
+        try
+        {
+            IsProcessing = true;
+            Error = null;
+
+            // debug opcional: Console.WriteLine($"DEBUG RemoveRole called for {UserId}/{role}");
+            var resp = await UserService.RemoveUserRoleAsync(UserId, role);
+            var text = await resp.Content.ReadAsStringAsync();
+            if (!resp.IsSuccessStatusCode)
+            {
+                Error = $"Error quitando rol: {resp.StatusCode} - {text}";
+                return;
+            }
+            await LoadRolesOnly();
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+}

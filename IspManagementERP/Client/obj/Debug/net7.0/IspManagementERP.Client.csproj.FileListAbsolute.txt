@@ -1693,11 +1693,8 @@ E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\ze4goh1t
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\duwtj0mw4n-tptq2av103.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\hk8aoo2hwx-lfu7j35m59.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\x0xikobjxu-7cxe8oq9xu.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\cplf5umlm7-c7ieyp1ab9.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\jbpqarclpl-o6mn7uozdu.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\evjr29yy5v-88wdwyrvnx.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\o54a1kzrbc-5frmfws74x.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\tt4pxv8ehc-31vlzngloe.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\cplf5umlm7-apf3mcvc6h.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\jbpqarclpl-e55ts06seb.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json.cache
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.development.json
@@ -1708,3 +1705,6 @@ E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\IspManagementERP.Cl
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\refint\IspManagementERP.Client.dll
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\IspManagementERP.Client.pdb
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\ref\IspManagementERP.Client.dll
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\evjr29yy5v-3nft3ct7of.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\o54a1kzrbc-mhg5qn5d40.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\tt4pxv8ehc-6zm0kx5uqr.gz

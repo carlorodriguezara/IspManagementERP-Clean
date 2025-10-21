@@ -1,0 +1,101 @@
+﻿@* Componente modal de acciones para un usuario.
+   Uso: <ActionsModal @ref="actionsModal" OnAssignRole="..." OnRemoveRole="..." ... />
+   Llamar await actionsModal.ShowAsync(userId, userEmail, roles, claims);
+   Todo el texto y comentarios en español. *@
+
+<div class="modal fade @(Visible ? "show d-block" : "")" tabindex="-1" style="@(Visible ? "display:block;" : "display:none;")" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Acciones — @UserEmail</h5>
+                <button type="button" class="btn-close" aria-label="Cerrar" @onclick="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2 text-muted">Selecciona la acción a ejecutar sobre este usuario.</p>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" @onclick="OnAddReportsView" disabled="@HasReportsView">Añadir permiso reports.view</button>
+                    <button class="btn btn-success" @onclick="OnGiveAdmin" disabled="@IsAdmin">Asignar rol Admin</button>
+                    @if (IsAdmin)
+                    {
+                        <button class="btn btn-outline-danger" @onclick="OnRemoveAdmin">Quitar rol Admin</button>
+                    }
+                    @if (HasReportsView)
+                    {
+                        <button class="btn btn-outline-danger" @onclick="OnRemoveReportsView">Quitar reports.view</button>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="Close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Visible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    // Estado visible y datos del usuario seleccionado
+    private bool Visible;
+    private string UserId = "";
+    private string UserEmail = "";
+    private List<string> UserRoles = new();
+    private List<(string Type, string Value)> UserClaims = new();
+
+    // Callbacks que el padre puede suscribir
+    [Parameter] public EventCallback<(string userId, string email)> OnAssignRoleRequested { get; set; }
+    [Parameter] public EventCallback<(string userId, string email)> OnRemoveRoleRequested { get; set; }
+    [Parameter] public EventCallback<(string userId, string email)> OnAddClaimRequested { get; set; }
+    [Parameter] public EventCallback<(string userId, string email)> OnRemoveClaimRequested { get; set; }
+
+    // Mostrar modal y cargar datos
+    public Task ShowAsync(string userId, string email, IEnumerable<string>? roles = null, IEnumerable<(string Type, string Value)>? claims = null)
+    {
+        UserId = userId;
+        UserEmail = email;
+        UserRoles = roles?.ToList() ?? new List<string>();
+        UserClaims = claims?.ToList() ?? new List<(string, string)>();
+        Visible = true;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void Close()
+    {
+        Visible = false;
+        StateHasChanged();
+    }
+
+    // Helpers para estado
+    private bool IsAdmin => UserRoles?.Contains("Admin") ?? false;
+    private bool HasReportsView => UserClaims?.Any(c => c.Type == "permission" && c.Value == "reports.view") ?? false;
+
+    // Invocadores de callbacks
+    private async Task OnGiveAdmin()
+    {
+        await OnAssignRoleRequested.InvokeAsync((UserId, UserEmail));
+        Close();
+    }
+
+    private async Task OnRemoveAdmin()
+    {
+        await OnRemoveRoleRequested.InvokeAsync((UserId, UserEmail));
+        Close();
+    }
+
+    private async Task OnAddReportsView()
+    {
+        await OnAddClaimRequested.InvokeAsync((UserId, UserEmail));
+        Close();
+    }
+
+    private async Task OnRemoveReportsView()
+    {
+        await OnRemoveClaimRequested.InvokeAsync((UserId, UserEmail));
+        Close();
+    }
+}

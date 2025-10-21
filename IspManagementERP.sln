@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución",
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IspManagementERP.Repositories", "IspManagementERP.Repositories\IspManagementERP.Repositories.csproj", "{441D0AE8-C10A-41F6-9A3D-F625870E09C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{AA73745B-2507-4DDA-A121-6EAB05B1D33C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA73745B-2507-4DDA-A121-6EAB05B1D33C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA73745B-2507-4DDA-A121-6EAB05B1D33C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{441D0AE8-C10A-41F6-9A3D-F625870E09C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{441D0AE8-C10A-41F6-9A3D-F625870E09C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{441D0AE8-C10A-41F6-9A3D-F625870E09C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{441D0AE8-C10A-41F6-9A3D-F625870E09C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

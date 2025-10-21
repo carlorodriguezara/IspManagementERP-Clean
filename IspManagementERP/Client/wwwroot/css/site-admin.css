@@ -1,0 +1,97 @@
+﻿/* ---------- Ajustes responsive y truncado para AdminUsers ---------- */
+
+/* Truncado con puntos suspensivos para emails largos en cards */
+.text-truncate-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Forzar que las celdas no generen overflow horizontal en la tabla */
+.table-responsive table td, .table-responsive table th {
+    white-space: normal; /* permitir wrap en celdas */
+    word-break: break-word;
+}
+
+/* Evitar que badges crezcan y rompan la fila */
+.list-group-item .badge, .table .badge {
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Aumentar touch target en móvil para el botón Acciones */
+@media (max-width: 767.98px) {
+    .list-group-item button.btn {
+        min-height: 38px;
+        padding-top: .45rem;
+        padding-bottom: .45rem;
+    }
+}
+
+/* Pequeña mejora visual para cards y separaciones */
+.list-group-item {
+    border-radius: .35rem;
+}
+
+
+/* ---------- Pulido final responsive para AdminUsers ---------- */
+
+/* Asegurar que la vista de tabla (desktop) quede oculta en móviles
+   y la vista mobile quede visible aunque haya conflictos de CSS. */
+@media (max-width: 767.98px) {
+    /* Forzar ocultado de cualquier contenedor marcado como 'desktop-only' */
+    .d-none.d-md-block,
+    .desktop-only {
+        display: none !important;
+    }
+
+    /* Forzar visible la vista móvil */
+    .d-block.d-md-none,
+    .mobile-only {
+        display: block !important;
+    }
+
+    /* Botones: touch target y ancho completo en móviles */
+    .list-group-item .btn,
+    .list-group .btn {
+        width: 100% !important;
+        min-height: 44px;
+        padding-top: .45rem;
+        padding-bottom: .45rem;
+    }
+
+    /* Evitar que la columna de acciones quede demasiado pegada: dar padding al contenedor */
+    .container-fluid, .main-content {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        box-sizing: border-box;
+    }
+}
+
+/* Forzar que tablas usen table-layout fijo y permitir quiebres de palabra */
+.table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+    .table td, .table th {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+/* Badges: permitir que hagan wrap y no expandan el contenedor */
+.badge {
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Mejora del scroll en móviles (suaviza el scroll) */
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Si hay problemas con scroll persistente, ocultarlo (último recurso) */
+/* body { overflow-x: hidden; }  <-- solo activar si estás seguro de que no se corta contenido */

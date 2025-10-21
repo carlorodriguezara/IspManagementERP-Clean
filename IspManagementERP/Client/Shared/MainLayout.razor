@@ -1,18 +1,57 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@using MudBlazor
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
-    <main>
-        <div class="top-row px-4 auth">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+<MudThemeProvider Theme="@MyDarkTheme">
+    <MudDialogProvider />
+    <MudSnackbarProvider MaxDisplayedSnackbars="3" PreventDuplicates="false">
+        <MudLayout>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+            <MudDrawer Elevation="1" Variant="DrawerVariant.Responsive" Open="true" ClipMode="DrawerClipMode.Never">
+                <MudNavMenu>
+                    <MudNavLink Href="" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+                    <MudNavLink Href="counter" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
+                    <MudNavLink Href="fetchdata" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
+                    <MudNavLink Href="admin/users" Icon="@Icons.Material.Filled.People">Admin Users</MudNavLink>
+                </MudNavMenu>
+            </MudDrawer>
+
+            <MudMainContent>
+                <MudAppBar Elevation="1" Color="Color.Primary">
+                    <MudText Typo="Typo.h6">IspManagementERP</MudText>
+                    <MudSpacer />
+                    <LoginDisplay />
+                </MudAppBar>
+
+                <div class="content pa-4">
+                    @Body
+                </div>
+            </MudMainContent>
+
+        </MudLayout>
+    </MudSnackbarProvider>
+</MudThemeProvider>
+
+@code {
+    // Tema Dark personalizado (puedes ajustarlo)
+    private MudTheme MyDarkTheme = new MudTheme()
+    {
+        Palette = new Palette()
+        {
+            Black = "#27272f",
+            Background = "#121212",
+            Surface = "#1E1E1E",
+            Primary = "#90caf9",     // azul claro
+            Secondary = "#f48fb1",   // rosa
+            AppbarBackground = "#1E1E1E",
+            TextPrimary = "#ffffff",
+            TextSecondary = "#cfcfcf"
+        },
+        LayoutProperties = new LayoutProperties()
+        {
+            DefaultBorderRadius = "6px"
+        }
+    };
+}

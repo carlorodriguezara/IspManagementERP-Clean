@@ -1,0 +1,143 @@
+﻿@namespace IspManagementERP.Client.Shared
+@using IspManagementERP.Shared.Identity
+@inject IspManagementERP.Client.Services.Identity.UserService UserService
+
+<div class="@ModalClass" tabindex="-1" style="display:@(Visible ? "block" : "none")" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Manage Claim Definitions</h5>
+                <button type="button" class="btn-close" aria-label="Cerrar" @onclick="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <input class="form-control" placeholder="Type" @bind="NewType" />
+                    </div>
+                    <div class="col-md-4">
+                        <input class="form-control" placeholder="Value" @bind="NewValue" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="form-control" placeholder="Description (opt)" @bind="NewDescription" />
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-success" @onclick="CreateDefinition" disabled="@IsProcessing || string.IsNullOrWhiteSpace(NewType) || string.IsNullOrWhiteSpace(NewValue)">Create</button>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Error))
+                {
+                    <div class="alert alert-danger">@Error</div>
+                }
+
+                <table class="table table-striped">
+                    <thead>
+                        <tr><th>Type</th><th>Value</th><th>Description</th><th>Created</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var d in Definitions)
+                        {
+                            <tr>
+                                <td>@d.Type</td>
+                                <td>@d.Value</td>
+                                <td>@d.Description</td>
+                                <td>@d.CreatedAt.ToString("u")</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteDefinition(d.Id)" disabled="@IsProcessing">Delete</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="Close" disabled="@IsProcessing">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool Visible;
+    private bool IsProcessing;
+    private string NewType = "";
+    private string NewValue = "";
+    private string NewDescription = "";
+    private List<ClaimDefinitionDTO> Definitions = new();
+    private string? Error;
+
+    private string ModalClass => Visible ? "modal fade show d-block" : "modal fade";
+
+    public async Task ShowAsync()
+    {
+        Error = null;
+        Visible = true;
+        await LoadDefs();
+        StateHasChanged();
+    }
+
+    public void Close()
+    {
+        Visible = false;
+        Error = null;
+        StateHasChanged();
+    }
+
+    private async Task LoadDefs()
+    {
+        try
+        {
+            Definitions = (await UserService.GetClaimDefinitionsAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+    }
+
+    private async Task CreateDefinition()
+    {
+        try
+        {
+            IsProcessing = true;
+            var dto = new ClaimDefinitionDTO { Type = NewType.Trim(), Value = NewValue.Trim(), Description = NewDescription?.Trim(), CreatedAt = DateTime.UtcNow };
+            var resp = await UserService.CreateClaimDefinitionAsync(dto);
+            if (!resp.IsSuccessStatusCode)
+            {
+                var text = await resp.Content.ReadAsStringAsync();
+                Error = $"Error creating: {resp.StatusCode} - {text}";
+                return;
+            }
+            NewType = NewValue = NewDescription = "";
+            await LoadDefs();
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally { IsProcessing = false; }
+    }
+
+    private async Task DeleteDefinition(int id)
+    {
+        try
+        {
+            IsProcessing = true;
+            var resp = await UserService.DeleteClaimDefinitionAsync(id);
+            if (!resp.IsSuccessStatusCode)
+            {
+                var text = await resp.Content.ReadAsStringAsync();
+                Error = $"Error deleting: {resp.StatusCode} - {text}";
+                return;
+            }
+            await LoadDefs();
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally { IsProcessing = false; }
+    }
+}

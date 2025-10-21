@@ -1,0 +1,60 @@
+﻿@* Modal de confirmación reutilizable y responsive.
+   En móviles se muestra a pantalla completa para mejor usabilidad. *@
+
+<div class="modal fade @(Visible ? "show d-block" : "")" tabindex="-1" style="@(Visible ? "display:block;" : "display:none;")" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Title</h5>
+                <button type="button" class="btn-close" aria-label="Cerrar" @onclick="Cancel"></button>
+            </div>
+            <div class="modal-body">
+                <p>@Message</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" @onclick="Cancel">Cancelar</button>
+                <button class="btn btn-primary" @onclick="Confirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Visible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private bool Visible;
+    private string Title = "";
+    private string Message = "";
+    private TaskCompletionSource<bool>? _tcs;
+
+    public Task<bool> ShowAsync(string title, string message)
+    {
+        Title = title;
+        Message = message;
+        _tcs = new TaskCompletionSource<bool>();
+        Visible = true;
+        StateHasChanged();
+        return _tcs.Task;
+    }
+
+    private void Confirm()
+    {
+        _tcs?.TrySetResult(true);
+        Close();
+    }
+
+    private void Cancel()
+    {
+        _tcs?.TrySetResult(false);
+        Close();
+    }
+
+    private void Close()
+    {
+        Visible = false;
+        StateHasChanged();
+    }
+}

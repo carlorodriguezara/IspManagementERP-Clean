@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Microsoft.Extensions.DependencyInjection;
 using Duende.IdentityServer.Services;
+using IspManagementERP.Repositories.Identity;
+using System.Data;
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +59,27 @@ builder.Services.AddScoped<IdentityDataSeeder>();
 // Registrar ProfileService (si lo usas)
 builder.Services.AddScoped<Duende.IdentityServer.Services.IProfileService, IspManagementERP.Server.Service.ProfileService>();
 
+// Registrar IDbConnection para que cada inyección obtenga una nueva SqlConnection
+builder.Services.AddTransient<IDbConnection>(sp =>
+    new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Registrar repo
+builder.Services.AddScoped<IIdentityAdminRepository, IdentityAdminRepository>();
+
+// en la configuración de servicios
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowClientWithCredentials", policy =>
+    {
+        policy.WithOrigins("https://localhost:7234", "https://localhost:5001") // -> pon aquí el origen del client EXACTO
+              .AllowCredentials()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// Asegúrate de que AddIdentity / UserManager / RoleManager ya están registrados (AddIdentity<ApplicationUser, IdentityRole>() ...)
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -84,6 +108,8 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
+
+app.UseCors("AllowClientWithCredentials");
 app.MapFallbackToFile("index.html");
 
 // Apply pending migrations at startup

@@ -1,0 +1,121 @@
+﻿@namespace IspManagementERP.Client.Shared
+@inject IspManagementERP.Client.Services.Identity.UserService UserService
+
+<div class="@ModalClass" tabindex="-1" style="display:@(Visible ? "block" : "none")" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Title</h5>
+                <button type="button" class="btn-close" @onclick="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (IsLoading)
+                {
+                    <div>Cargando...</div>
+                }
+                else
+                {
+                    <div class="mb-2">
+                        <label>Email</label>
+                        <input class="form-control" @bind="Model.Email" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Usuario</label>
+                        <input class="form-control" @bind="Model.UserName" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Phone</label>
+                        <input class="form-control" @bind="Model.PhoneNumber" />
+                    </div>
+
+                    @if (IsCreate)
+                    {
+                        <div class="mb-2">
+                            <label>Password</label>
+                            <input type="password" class="form-control" @bind="Password" />
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Error))
+                    {
+                        <div class="alert alert-danger">@Error</div>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="Close" disabled="@IsProcessing">Cancelar</button>
+                <button class="btn btn-primary" @onclick="SaveAsync" disabled="@IsProcessing">@SaveLabel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool Visible;
+    private bool IsLoading;
+    private bool IsProcessing;
+    private bool IsCreate;
+    private string Title = "Editar usuario";
+    private string SaveLabel = "Guardar";
+    private string Password = "";
+    private string Error = "";
+    private string UserId = "";
+    private UserDto Model = new UserDto();
+    private string ModalClass => Visible ? "modal fade show d-block" : "modal fade";
+
+    public async Task ShowCreateAsync()
+    {
+        IsCreate = true;
+        Title = "Crear usuario";
+        SaveLabel = "Crear";
+        Model = new UserDto();
+        Password = "";
+        Visible = true;
+        StateHasChanged();
+    }
+
+    public async Task ShowEditAsync(string userId)
+    {
+        IsCreate = false;
+        Title = "Editar usuario";
+        SaveLabel = "Guardar";
+        UserId = userId;
+        IsLoading = true;
+        Visible = true;
+        Error = "";
+        StateHasChanged();
+        try
+        {
+            var u = await UserService.GetUserAsync(userId);
+            if (u != null) Model = u;
+        }
+        catch (System.Exception ex) { Error = ex.Message; }
+        finally { IsLoading = false; StateHasChanged(); }
+    }
+
+    public void Close() { Visible = false; IsProcessing = false; Error = ""; StateHasChanged(); }
+
+    private async Task SaveAsync()
+    {
+        IsProcessing = true;
+        Error = "";
+        try
+        {
+            if (IsCreate)
+            {
+                var create = new CreateUserModel { Email = Model.Email, UserName = Model.UserName, Password = Password, PhoneNumber = Model.PhoneNumber };
+                var resp = await UserService.CreateUserAsync(create);
+                if (!resp.IsSuccessStatusCode) { Error = $"Error: {resp.StatusCode}"; IsProcessing = false; return; }
+            }
+            else
+            {
+                var update = new UpdateUserModel { Email = Model.Email, UserName = Model.UserName, PhoneNumber = Model.PhoneNumber };
+                var resp = await UserService.UpdateUserAsync(UserId, update);
+                if (!resp.IsSuccessStatusCode) { Error = $"Error: {resp.StatusCode}"; IsProcessing = false; return; }
+            }
+            Close();
+        }
+        catch (System.Exception ex) { Error = ex.Message; }
+        finally { IsProcessing = false; StateHasChanged(); }
+    }
+}
