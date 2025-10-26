@@ -1,121 +1,256 @@
-﻿@namespace IspManagementERP.Client.Shared
+﻿@using MudBlazor
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
+@using IspManagementERP.Shared.Identity
 @inject IspManagementERP.Client.Services.Identity.UserService UserService
+@inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthStateProvider
 
-<div class="@ModalClass" tabindex="-1" style="display:@(Visible ? "block" : "none")" role="dialog" aria-modal="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">@Title</h5>
-                <button type="button" class="btn-close" @onclick="Close"></button>
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6">@Title</MudText>
+
+        @if (IsLoading)
+        {
+            <div class="d-flex justify-center my-4">
+                <MudProgressCircular Indeterminate="true" Size="Size.Medium" />
             </div>
-            <div class="modal-body">
-                @if (IsLoading)
-                {
-                    <div>Cargando...</div>
-                }
-                else
-                {
-                    <div class="mb-2">
-                        <label>Email</label>
-                        <input class="form-control" @bind="Model.Email" />
-                    </div>
-                    <div class="mb-2">
-                        <label>Usuario</label>
-                        <input class="form-control" @bind="Model.UserName" />
-                    </div>
-                    <div class="mb-2">
-                        <label>Phone</label>
-                        <input class="form-control" @bind="Model.PhoneNumber" />
-                    </div>
+        }
+        else
+        {
+            <MudForm @ref="form" Class="mt-2">
+                <MudTextField T="string" @bind-Value="Model.Email" Label="Email" Required="true" />
+                <MudTextField T="string" @bind-Value="Model.UserName" Label="Usuario" Required="true" />
+                <MudTextField T="string" @bind-Value="Model.PhoneNumber" Label="Phone" />
 
-                    @if (IsCreate)
+                <MudTextField T="string" @bind-Value="Model.FirstName" Label="Nombre" />
+                <MudTextField T="string" @bind-Value="Model.LastName" Label="Apellido" />
+                <MudTextField T="string" @bind-Value="Model.Address" Label="Dirección" />
+
+                <div class="mt-2">
+                    <label class="mud-typography mud-typography-caption">Foto de perfil (preview)</label>
+                    @if (!string.IsNullOrEmpty(ProfilePreview))
                     {
-                        <div class="mb-2">
-                            <label>Password</label>
-                            <input type="password" class="form-control" @bind="Password" />
+                        <div class="my-2">
+                            <img src="@ProfilePreview" alt="Profile preview" style="max-width:120px; max-height:120px; border-radius:6px;" />
                         </div>
                     }
+                    <InputFile OnChange="OnInputFileChange" />
+                    <MudText Typo="Typo.caption" Class="text-muted">Formato recomendado: JPG/PNG. El fichero no se sube automáticamente; implementa endpoint si quieres guardarlo en servidor.</MudText>
+                </div>
 
-                    @if (!string.IsNullOrEmpty(Error))
-                    {
-                        <div class="alert alert-danger">@Error</div>
-                    }
+                <MudCheckBox T="bool" @bind-Value="ModelIsEnabled" Label="Habilitado" Class="mt-2" />
+
+                @if (_isSuperAdmin)
+                {
+                    <MudTextField T="string" @bind-Value="ModelTenantIdString" Label="TenantId (solo SuperAdmin)" />
                 }
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" @onclick="Close" disabled="@IsProcessing">Cancelar</button>
-                <button class="btn btn-primary" @onclick="SaveAsync" disabled="@IsProcessing">@SaveLabel</button>
-            </div>
-        </div>
-    </div>
-</div>
+
+                @if (!string.IsNullOrEmpty(Error))
+                {
+                    <MudAlert Severity="Severity.Error" Elevation="0" Class="mt-2">@Error</MudAlert>
+                }
+            </MudForm>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel" Disabled="@IsProcessing">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="@IsProcessing">@SaveLabel</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
-    private bool Visible;
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public string? UserId { get; set; }
+
+    private MudForm? form;
     private bool IsLoading;
     private bool IsProcessing;
     private bool IsCreate;
     private string Title = "Editar usuario";
     private string SaveLabel = "Guardar";
-    private string Password = "";
     private string Error = "";
-    private string UserId = "";
-    private UserDto Model = new UserDto();
-    private string ModalClass => Visible ? "modal fade show d-block" : "modal fade";
+    private UserDto Model = new();
+    private bool _isSuperAdmin = false;
+    private IBrowserFile? _selectedFile;
+    private string? ProfilePreview;
 
-    public async Task ShowCreateAsync()
+    private bool ModelIsEnabled
     {
-        IsCreate = true;
-        Title = "Crear usuario";
-        SaveLabel = "Crear";
-        Model = new UserDto();
-        Password = "";
-        Visible = true;
-        StateHasChanged();
+        get => Model.IsEnabled;
+        set => Model.IsEnabled = value;
     }
 
-    public async Task ShowEditAsync(string userId)
+    private string ModelTenantIdString
     {
-        IsCreate = false;
-        Title = "Editar usuario";
-        SaveLabel = "Guardar";
-        UserId = userId;
-        IsLoading = true;
-        Visible = true;
-        Error = "";
-        StateHasChanged();
-        try
+        get => Model.TenantId.ToString();
+        set
         {
-            var u = await UserService.GetUserAsync(userId);
-            if (u != null) Model = u;
+            if (int.TryParse(value, out var t)) Model.TenantId = t;
         }
-        catch (System.Exception ex) { Error = ex.Message; }
-        finally { IsLoading = false; StateHasChanged(); }
     }
 
-    public void Close() { Visible = false; IsProcessing = false; Error = ""; StateHasChanged(); }
-
-    private async Task SaveAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        IsProcessing = true;
-        Error = "";
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        _isSuperAdmin = user.Identity?.IsAuthenticated == true &&
+                        (user.IsInRole("SuperAdmin") || user.HasClaim(c => c.Type == "scope" && c.Value == "admin.global"));
+
+        if (string.IsNullOrWhiteSpace(UserId))
+        {
+            IsCreate = true;
+            Title = "Crear usuario";
+            SaveLabel = "Crear";
+            Model = new UserDto();
+            ProfilePreview = null;
+        }
+        else
+        {
+            IsCreate = false;
+            Title = "Editar usuario";
+            SaveLabel = "Guardar";
+            await LoadUserAsync(UserId);
+        }
+    }
+
+    private async Task LoadUserAsync(string userId)
+    {
         try
         {
-            if (IsCreate)
+            IsLoading = true;
+            Error = "";
+            var dto = await UserService.GetUserDetailsAsync(userId);
+            if (dto != null)
             {
-                var create = new CreateUserModel { Email = Model.Email, UserName = Model.UserName, Password = Password, PhoneNumber = Model.PhoneNumber };
-                var resp = await UserService.CreateUserAsync(create);
-                if (!resp.IsSuccessStatusCode) { Error = $"Error: {resp.StatusCode}"; IsProcessing = false; return; }
+                Model = dto;
+                if (!string.IsNullOrEmpty(dto.ProfilePictureBase64))
+                    ProfilePreview = $"data:image/png;base64,{dto.ProfilePictureBase64}";
             }
             else
             {
-                var update = new UpdateUserModel { Email = Model.Email, UserName = Model.UserName, PhoneNumber = Model.PhoneNumber };
-                var resp = await UserService.UpdateUserAsync(UserId, update);
-                if (!resp.IsSuccessStatusCode) { Error = $"Error: {resp.StatusCode}"; IsProcessing = false; return; }
+                Error = "Usuario no encontrado.";
             }
-            Close();
         }
-        catch (System.Exception ex) { Error = ex.Message; }
-        finally { IsProcessing = false; StateHasChanged(); }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
     }
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            _selectedFile = e.File;
+            var maxBytes = 1024 * 1024;
+            using var stream = _selectedFile.OpenReadStream(maxAllowedSize: maxBytes);
+            var buffer = new byte[_selectedFile.Size > maxBytes ? maxBytes : (int)_selectedFile.Size];
+            await stream.ReadAsync(buffer, 0, buffer.Length);
+            var base64 = Convert.ToBase64String(buffer);
+            ProfilePreview = $"data:{_selectedFile.ContentType};base64,{base64}";
+            // Optionally: Model.ProfilePictureBase64 = base64;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error leyendo archivo: " + ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        Error = "";
+        try
+        {
+            IsProcessing = true;
+
+            if (form is not null)
+            {
+                await form.Validate();
+                if (!form.IsValid)
+                {
+                    Error = "Por favor corrija los campos requeridos.";
+                    return;
+                }
+            }
+
+            if (IsCreate)
+            {
+                var create = new CreateUserModel
+                {
+                    Email = Model.Email ?? "",
+                    UserName = Model.UserName ?? "",
+                    Password = await PromptPasswordAsync(),
+                    PhoneNumber = Model.PhoneNumber,
+                    TenantId = Model.TenantId
+                };
+
+                if (string.IsNullOrEmpty(create.Password))
+                {
+                    Error = "Password requerida para crear usuario.";
+                    return;
+                }
+
+                var resp = await UserService.CreateUserAsync(create);
+                if (!resp.IsSuccessStatusCode)
+                {
+                    var txt = await resp.Content.ReadAsStringAsync();
+                    Error = $"Error creando usuario: {resp.StatusCode} - {txt}";
+                    return;
+                }
+
+                Snackbar.Add("Usuario creado", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                var update = new UpdateUserModel
+                {
+                    Email = Model.Email,
+                    UserName = Model.UserName,
+                    PhoneNumber = Model.PhoneNumber,
+                    FirstName = Model.FirstName,
+                    LastName = Model.LastName,
+                    Address = Model.Address,
+                    IsEnabled = Model.IsEnabled,
+                    TenantId = _isSuperAdmin ? Model.TenantId : null
+                };
+
+                var resp = await UserService.UpdateUserAsync(Model.Id, update);
+                if (!resp.IsSuccessStatusCode)
+                {
+                    var txt = await resp.Content.ReadAsStringAsync();
+                    Error = $"Error actualizando usuario: {resp.StatusCode} - {txt}";
+                    return;
+                }
+
+                Snackbar.Add("Usuario actualizado", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            IsProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private Task<string> PromptPasswordAsync()
+    {
+        // Implementar UI real si quieres crear usuarios desde el modal.
+        return Task.FromResult(string.Empty);
+    }
+
+    private void Cancel() => MudDialog.Cancel();
 }

@@ -1074,11 +1074,11 @@
           }
         }
       },
-      "Microsoft.Extensions.Localization/7.0.20": {
+      "Microsoft.Extensions.Localization/7.0.17": {
         "type": "package",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "7.0.0",
-          "Microsoft.Extensions.Localization.Abstractions": "7.0.20",
+          "Microsoft.Extensions.Localization.Abstractions": "7.0.17",
           "Microsoft.Extensions.Logging.Abstractions": "7.0.1",
           "Microsoft.Extensions.Options": "7.0.1"
         },
@@ -1093,7 +1093,7 @@
           }
         }
       },
-      "Microsoft.Extensions.Localization.Abstractions/7.0.20": {
+      "Microsoft.Extensions.Localization.Abstractions/7.0.17": {
         "type": "package",
         "compile": {
           "lib/net7.0/Microsoft.Extensions.Localization.Abstractions.dll": {
@@ -1408,12 +1408,12 @@
           "lib/netstandard2.0/Mono.TextTemplating.dll": {}
         }
       },
-      "MudBlazor/7.16.0": {
+      "MudBlazor/6.21.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.AspNetCore.Components": "7.0.20",
-          "Microsoft.AspNetCore.Components.Web": "7.0.20",
-          "Microsoft.Extensions.Localization": "7.0.20"
+          "Microsoft.AspNetCore.Components": "7.0.17",
+          "Microsoft.AspNetCore.Components.Web": "7.0.17",
+          "Microsoft.Extensions.Localization": "7.0.17"
         },
         "compile": {
           "lib/net7.0/MudBlazor.dll": {
@@ -1917,7 +1917,7 @@
           "Microsoft.AspNetCore.Components.WebAssembly": "7.0.20",
           "Microsoft.AspNetCore.Components.WebAssembly.Authentication": "7.0.20",
           "Microsoft.Extensions.Http": "7.0.0",
-          "MudBlazor": "7.16.0"
+          "MudBlazor": "6.21.0"
         },
         "compile": {
           "bin/placeholder/IspManagementERP.Client.dll": {}
@@ -3306,10 +3306,10 @@
         "microsoft.extensions.identity.stores.nuspec"
       ]
     },
-    "Microsoft.Extensions.Localization/7.0.20": {
-      "sha512": "i9sZZUXKeSj0BG9PDpxcrqpY4Zm8Fpk6Hed6nLltVeOGfluNAON3IXOvsl37mrTydKmBLFcLucrRF3J3GIMU2A==",
+    "Microsoft.Extensions.Localization/7.0.17": {
+      "sha512": "RigVh8ggp2rWnIDrbj2fx28nqn+IEKvdjMOLs91VX9r5BkdN7TmYytHEgTqtokRAX33iM+50op+C/am6Tcp6tQ==",
       "type": "package",
-      "path": "microsoft.extensions.localization/7.0.20",
+      "path": "microsoft.extensions.localization/7.0.17",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3321,14 +3321,14 @@
         "lib/net7.0/Microsoft.Extensions.Localization.xml",
         "lib/netstandard2.0/Microsoft.Extensions.Localization.dll",
         "lib/netstandard2.0/Microsoft.Extensions.Localization.xml",
-        "microsoft.extensions.localization.7.0.20.nupkg.sha512",
+        "microsoft.extensions.localization.7.0.17.nupkg.sha512",
         "microsoft.extensions.localization.nuspec"
       ]
     },
-    "Microsoft.Extensions.Localization.Abstractions/7.0.20": {
-      "sha512": "kXxF0jflcQJnwmWIjB48PEkerG2QH1WrXEgEUdxtSLgL7IqI+VhbKrE7sUg0iRU5fbm8UyEuPQzvBn45zBQ8rQ==",
+    "Microsoft.Extensions.Localization.Abstractions/7.0.17": {
+      "sha512": "+c3HY3m2VyGT8ec+jkKPmOWBnVMi/LGSZHq3AoTNFLoCG3xsuQKkNHHnjznDAtAm8JnP1HNQ4eA6pZzfNzrBKw==",
       "type": "package",
-      "path": "microsoft.extensions.localization.abstractions/7.0.20",
+      "path": "microsoft.extensions.localization.abstractions/7.0.17",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3340,7 +3340,7 @@
         "lib/net7.0/Microsoft.Extensions.Localization.Abstractions.xml",
         "lib/netstandard2.0/Microsoft.Extensions.Localization.Abstractions.dll",
         "lib/netstandard2.0/Microsoft.Extensions.Localization.Abstractions.xml",
-        "microsoft.extensions.localization.abstractions.7.0.20.nupkg.sha512",
+        "microsoft.extensions.localization.abstractions.7.0.17.nupkg.sha512",
         "microsoft.extensions.localization.abstractions.nuspec"
       ]
     },
@@ -3806,27 +3806,26 @@
         "mono.texttemplating.nuspec"
       ]
     },
-    "MudBlazor/7.16.0": {
-      "sha512": "68bEFn7MLCyOB4yYxtvZG+AA+bZbxBDcIOhnSVFrHrAg8LLXVw1LxHCp9EyRktlREpnoAO1JxINp+5WeHc9Z4w==",
+    "MudBlazor/6.21.0": {
+      "sha512": "bIHvrU0fkoQD4rZHQRZDDoxMUbJMozRzhpkSUZ/gWCXjmhT3PV/NiExkr+0tbokH7xzTnwOkKDevwXH9QBeoMw==",
       "type": "package",
-      "path": "mudblazor/7.16.0",
+      "path": "mudblazor/6.21.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE",
         "Nuget.png",
-        "README.md",
-        "analyzers/dotnet/cs/MudBlazor.Analyzers.dll",
         "build/Microsoft.AspNetCore.StaticWebAssets.props",
         "build/MudBlazor.props",
-        "build/MudBlazor.targets",
         "buildMultiTargeting/MudBlazor.props",
         "buildTransitive/MudBlazor.props",
+        "lib/net6.0/MudBlazor.dll",
+        "lib/net6.0/MudBlazor.xml",
         "lib/net7.0/MudBlazor.dll",
         "lib/net7.0/MudBlazor.xml",
         "lib/net8.0/MudBlazor.dll",
         "lib/net8.0/MudBlazor.xml",
-        "mudblazor.7.16.0.nupkg.sha512",
+        "mudblazor.6.21.0.nupkg.sha512",
         "mudblazor.nuspec",
         "staticwebassets/MudBlazor.min.css",
         "staticwebassets/MudBlazor.min.js"

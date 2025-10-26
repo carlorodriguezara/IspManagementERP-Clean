@@ -1,43 +1,30 @@
-﻿@namespace IspManagementERP.Client.Shared
+﻿@using MudBlazor
 
-<div class="@ModalClass" tabindex="-1" style="display:@(Visible ? "block" : "none")">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body">
-                <p>@Message</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" @onclick="Cancel">Cancelar</button>
-                <button class="btn btn-danger" @onclick="Confirm">Borrar</button>
-            </div>
-        </div>
-    </div>
-</div>
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6">Confirmar</MudText>
+        <MudDivider Class="my-2" />
+        <MudText>@Message</MudText>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="Confirm">Borrar</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
-    private bool Visible;
-    private string Message = "¿Confirmar?";
-    public EventCallback<bool> OnResult { get; set; }
-    private string ModalClass => Visible ? "modal fade show d-block" : "modal fade";
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public string Message { get; set; } = "¿Confirmar?";
 
-    public Task<bool> ShowAsync(string message)
+    private void Confirm()
     {
-        Message = message;
-        Visible = true;
-        StateHasChanged();
-        var tcs = new TaskCompletionSource<bool>();
-        OnResult = EventCallback.Factory.Create<bool>(this, (bool r) => { tcs.SetResult(r); return Task.CompletedTask; });
-        return tcs.Task;
+        // Return true as the dialog result data
+        MudDialog.Close(DialogResult.Ok(true));
     }
 
-    private async Task Confirm()
+    private void Cancel()
     {
-        Visible = false;
-        await OnResult.InvokeAsync(true);
-    }
-    private async Task Cancel()
-    {
-        Visible = false;
-        await OnResult.InvokeAsync(false);
+        MudDialog.Close(DialogResult.Cancel());
     }
 }

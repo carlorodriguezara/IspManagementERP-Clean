@@ -886,6 +886,8 @@ E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.FileProviders.Physical.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.FileSystemGlobbing.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.Http.dll
+E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.Localization.Abstractions.dll
+E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.Localization.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.Logging.Abstractions.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.Logging.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.Options.dll
@@ -897,6 +899,7 @@ E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Win32.Primitives.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Win32.Registry.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\mscorlib.dll
+E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\MudBlazor.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\netstandard.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.AppContext.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Buffers.dll
@@ -1075,6 +1078,7 @@ E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.AspNetCore.Metadata.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.IO.Pipes.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Security.Cryptography.dll.gz
+E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.Localization.Abstractions.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.IO.FileSystem.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Runtime.Serialization.Xml.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Memory.dll.gz
@@ -1156,6 +1160,7 @@ E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Threading.Thread.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Win32.Registry.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Collections.Concurrent.dll.gz
+E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\MudBlazor.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Net.Http.Json.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\IspManagementERP.Shared.pdb.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Buffers.dll.gz
@@ -1228,6 +1233,7 @@ E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\blazor.boot.json.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.FileProviders.Abstractions.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Runtime.Intrinsics.dll.gz
+E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\Microsoft.Extensions.Localization.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Net.Sockets.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Xml.Linq.dll.gz
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\wwwroot\_framework\System.Globalization.Extensions.dll.gz
@@ -1290,12 +1296,15 @@ E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.Extension
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.Extensions.FileProviders.Physical.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.Extensions.FileSystemGlobbing.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.Extensions.Http.dll
+E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.Extensions.Localization.dll
+E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.Extensions.Localization.Abstractions.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.Extensions.Logging.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.Extensions.Logging.Abstractions.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.Extensions.Options.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.Extensions.Primitives.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.JSInterop.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.JSInterop.WebAssembly.dll
+E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\MudBlazor.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\System.IO.Pipelines.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.CSharp.dll
 E:\IspManagementERP\IspManagementERP\Client\bin\Debug\net7.0\Microsoft.VisualBasic.Core.dll
@@ -1511,12 +1520,15 @@ E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\ttd712mz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\6vr7weno5b-vi1xsib3zw.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\5tqk41sxag-6d0d6d1ost.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\980vh9fsro-e4e9crlua8.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\u3lwitw49z-htwm12xzn6.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\35t3dc8nsd-eybqy829z1.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\sueqgoewzg-w6f789y4uu.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\49l5awbo65-a5f596hkdg.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\k0v9rraq9x-vsno8mpsaj.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\junyomcfw2-9zqro3rcxh.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\xezqdc9p6q-dj1yoma6fr.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\ykdx6jqtuh-pbvpl6c200.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\ignbdbixe8-sf2xmm6vek.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\qy1k3cdxnk-7u4f1vnlb7.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\1kal0tgvam-3l6rz51seh.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\z4nm9rc43z-5vwfddg8g5.gz
@@ -1693,8 +1705,8 @@ E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\ze4goh1t
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\duwtj0mw4n-tptq2av103.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\hk8aoo2hwx-lfu7j35m59.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\x0xikobjxu-7cxe8oq9xu.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\cplf5umlm7-apf3mcvc6h.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\jbpqarclpl-e55ts06seb.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\cplf5umlm7-096mak41wh.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\jbpqarclpl-y8oht9x61t.gz
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.build.json.cache
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\staticwebassets.development.json
@@ -1705,6 +1717,6 @@ E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\IspManagementERP.Cl
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\refint\IspManagementERP.Client.dll
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\IspManagementERP.Client.pdb
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\ref\IspManagementERP.Client.dll
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\evjr29yy5v-3nft3ct7of.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\o54a1kzrbc-mhg5qn5d40.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\tt4pxv8ehc-6zm0kx5uqr.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\evjr29yy5v-jrp2kz4n4c.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\o54a1kzrbc-nu5qirnm6u.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\tt4pxv8ehc-2ly5uwknll.gz

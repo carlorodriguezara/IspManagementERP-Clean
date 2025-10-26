@@ -1,114 +1,101 @@
-﻿@namespace IspManagementERP.Client.Shared
+﻿@using MudBlazor
 @inject IspManagementERP.Client.Services.Identity.UserService UserService
+@inject ISnackbar Snackbar
 
-<div class="@ModalClass" tabindex="-1" style="display:@(Visible ? "block" : "none")" role="dialog" aria-modal="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Roles — @UserEmail</h5>
-                <button type="button" class="btn-close" aria-label="Cerrar" @onclick="Close"></button>
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6">Roles — @UserEmail</MudText>
+        <MudDivider Class="my-2" />
+
+        @if (IsLoading)
+        {
+            <div class="d-flex justify-center my-4">
+                <MudProgressCircular Indeterminate="true" Size="Size.Medium" />
             </div>
-
-            <div class="modal-body">
-                <h6>Asignados</h6>
-
-                @if (IsLoading)
-                {
-                    <div>Cargando...</div>
-                }
-                else if (UserRoles == null || !UserRoles.Any())
-                {
-                    <div class="text-muted">No tiene roles.</div>
-                }
-                else
-                {
+        }
+        else
+        {
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Asignados</MudText>
+            @if (UserRoles == null || !UserRoles.Any())
+            {
+                <MudText color="Color.Secondary">No tiene roles.</MudText>
+            }
+            else
+            {
+                <MudList Dense="true">
                     @foreach (var r in UserRoles)
                     {
-                        var roleName = r; // captura local para evitar closure bug
-                                          <div class="d-flex justify-content-between align-items-center border-bottom py-1">
-                                              <div>@roleName</div>
-                                              <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => OnRemoveRoleClicked(roleName)" disabled="@IsProcessing">Quitar</button>
-                                          </div>
+                        <MudListItem>
+                            <MudText>@r</MudText>
+                            <MudSpacer />
+                            <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" OnClick="() => RemoveRole(r)" Disabled="@IsProcessing">Quitar</MudButton>
+                        </MudListItem>
                     }
-                }
+                </MudList>
+            }
 
-                <h6 class="mt-3">Disponibles</h6>
+            <MudDivider Class="my-2" />
 
-                @if (AllRoles == null || !AllRoles.Any())
-                {
-                    <div class="text-muted">No roles definidos.</div>
-                }
-                else
-                {
-                    foreach (var r in AllRoles.Except(UserRoles ?? Enumerable.Empty<string>()))
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Disponibles</MudText>
+            @if (AllRoles == null || !AllRoles.Any())
+            {
+                <MudText color="Color.Secondary">No roles definidos.</MudText>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var r in AllRoles.Except(UserRoles ?? Enumerable.Empty<string>()))
                     {
-                        var roleName = r;
-                        <div class="d-flex justify-content-between align-items-center border-bottom py-1">
-                            <div>@roleName</div>
-                            <button type="button" class="btn btn-sm btn-outline-primary" @onclick="() => OnAddRoleClicked(roleName)" disabled="@IsProcessing">Asignar</button>
+                        <div class="d-flex align-center">
+                            <MudText>@r</MudText>
+                            <MudSpacer />
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="() => AddRole(r)" Disabled="@IsProcessing">Asignar</MudButton>
                         </div>
                     }
-                }
+                </div>
+            }
+        }
 
-                @if (!string.IsNullOrEmpty(Error))
-                {
-                    <div class="alert alert-danger mt-2" style="white-space:pre-wrap">@Error</div>
-                }
-            </div>
+        @if (!string.IsNullOrEmpty(Error))
+        {
+            <MudAlert Severity="Severity.Error" Elevation="0" Class="mt-2">@Error</MudAlert>
+        }
+    </DialogContent>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @onclick="Close" disabled="@IsProcessing">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Close">Cerrar</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
-    private bool Visible;
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public string UserId { get; set; } = "";
+    [Parameter] public string UserEmail { get; set; } = "";
+
     private bool IsLoading;
     private bool IsProcessing;
-    private string UserId = "";
-    private string UserEmail = "";
-    private HashSet<string> UserRoles = new();
     private List<string> AllRoles = new();
+    private HashSet<string> UserRoles = new();
     private string? Error;
 
-    private string ModalClass => Visible ? "modal fade show d-block" : "modal fade";
-
-    // Método público llamado por AdminUsers.razor (referencia)
-    public async Task ShowAsync(string userId, string email, string? userName = "")
+    protected override async Task OnInitializedAsync()
     {
-        Error = null;
-        UserId = userId ?? "";
-        UserEmail = email ?? userName ?? "";
-        Visible = true;
-        await LoadRolesOnly();   // SOLO GET — ninguna operación de escritura aquí
-        StateHasChanged();
+        await LoadRolesAsync();
     }
 
-    private void Close()
-    {
-        Visible = false;
-        Error = null;
-        StateHasChanged();
-    }
-
-    // Carga únicamente (GET)
-    private async Task LoadRolesOnly()
+    private async Task LoadRolesAsync()
     {
         try
         {
             IsLoading = true;
             Error = null;
-
-            // Cargar todos los roles y roles del usuario desde el servicio cliente (GETs)
-            AllRoles = (await UserService.GetRolesAsync()).ToList();
+            AllRoles = (await UserService.GetRolesAsync())?.ToList() ?? new List<string>();
             var ur = await UserService.GetUserRolesAsync(UserId);
             UserRoles = new HashSet<string>(ur ?? Enumerable.Empty<string>());
         }
         catch (Exception ex)
         {
-            Error = "Error cargando roles: " + ex.Message;
+            Error = ex.Message;
         }
         finally
         {
@@ -116,25 +103,26 @@
         }
     }
 
-    // Handler para asignar rol (ejecuta POST)
-    private async Task OnAddRoleClicked(string role)
+    private async Task AddRole(string role)
     {
         try
         {
             IsProcessing = true;
-            Error = null;
             var resp = await UserService.AddUserRoleAsync(UserId, role);
-            var text = await resp.Content.ReadAsStringAsync();
             if (!resp.IsSuccessStatusCode)
             {
-                Error = $"Error asignando rol: {resp.StatusCode} - {text}";
-                return;
+                var txt = await resp.Content.ReadAsStringAsync();
+                Snackbar.Add($"Error asignando rol: {txt}", Severity.Error);
             }
-            await LoadRolesOnly();
+            else
+            {
+                Snackbar.Add($"Rol '{role}' asignado", Severity.Success);
+            }
+            await LoadRolesAsync();
         }
         catch (Exception ex)
         {
-            Error = ex.Message;
+            Snackbar.Add(ex.Message, Severity.Error);
         }
         finally
         {
@@ -142,31 +130,32 @@
         }
     }
 
-    // Handler para quitar rol (ejecuta DELETE) — SOLO se ejecuta al hacer click
-    private async Task OnRemoveRoleClicked(string role)
+    private async Task RemoveRole(string role)
     {
         try
         {
             IsProcessing = true;
-            Error = null;
-
-            // debug opcional: Console.WriteLine($"DEBUG RemoveRole called for {UserId}/{role}");
             var resp = await UserService.RemoveUserRoleAsync(UserId, role);
-            var text = await resp.Content.ReadAsStringAsync();
             if (!resp.IsSuccessStatusCode)
             {
-                Error = $"Error quitando rol: {resp.StatusCode} - {text}";
-                return;
+                var txt = await resp.Content.ReadAsStringAsync();
+                Snackbar.Add($"Error quitando rol: {txt}", Severity.Error);
             }
-            await LoadRolesOnly();
+            else
+            {
+                Snackbar.Add($"Rol '{role}' removido", Severity.Success);
+            }
+            await LoadRolesAsync();
         }
         catch (Exception ex)
         {
-            Error = ex.Message;
+            Snackbar.Add(ex.Message, Severity.Error);
         }
         finally
         {
             IsProcessing = false;
         }
     }
+
+    private void Close() => MudDialog.Close();
 }

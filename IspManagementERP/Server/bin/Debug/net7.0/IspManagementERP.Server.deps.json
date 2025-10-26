@@ -629,6 +629,28 @@
           }
         }
       },
+      "Microsoft.Extensions.Localization/7.0.17": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "7.0.0",
+          "Microsoft.Extensions.Localization.Abstractions": "7.0.17",
+          "Microsoft.Extensions.Logging.Abstractions": "7.0.1",
+          "Microsoft.Extensions.Options": "7.0.1"
+        },
+        "runtime": {
+          "lib/net7.0/Microsoft.Extensions.Localization.dll": {
+            "assemblyVersion": "7.0.0.0",
+            "fileVersion": "7.0.1724.11613"
+          }
+        }
+      },
+      "Microsoft.Extensions.Localization.Abstractions/7.0.17": {
+        "runtime": {
+          "lib/net7.0/Microsoft.Extensions.Localization.Abstractions.dll": {
+            "assemblyVersion": "7.0.0.0",
+            "fileVersion": "7.0.1724.11613"
+          }
+        }
+      },
       "Microsoft.Extensions.Logging/7.0.0": {
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection": "7.0.0",
@@ -805,6 +827,19 @@
           "lib/netstandard2.0/Mono.TextTemplating.dll": {
             "assemblyVersion": "2.2.0.0",
             "fileVersion": "2.2.1.1"
+          }
+        }
+      },
+      "MudBlazor/6.21.0": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Components": "7.0.20",
+          "Microsoft.AspNetCore.Components.Web": "7.0.20",
+          "Microsoft.Extensions.Localization": "7.0.17"
+        },
+        "runtime": {
+          "lib/net7.0/MudBlazor.dll": {
+            "assemblyVersion": "6.21.0.0",
+            "fileVersion": "6.21.0.0"
           }
         }
       },
@@ -1005,7 +1040,8 @@
           "IspManagementERP.Shared": "1.0.0",
           "Microsoft.AspNetCore.Components.WebAssembly": "7.0.20",
           "Microsoft.AspNetCore.Components.WebAssembly.Authentication": "7.0.20",
-          "Microsoft.Extensions.Http": "7.0.0"
+          "Microsoft.Extensions.Http": "7.0.0",
+          "MudBlazor": "6.21.0"
         },
         "runtime": {
           "IspManagementERP.Client.dll": {
@@ -1450,6 +1486,20 @@
       "path": "microsoft.extensions.identity.stores/7.0.20",
       "hashPath": "microsoft.extensions.identity.stores.7.0.20.nupkg.sha512"
     },
+    "Microsoft.Extensions.Localization/7.0.17": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-RigVh8ggp2rWnIDrbj2fx28nqn+IEKvdjMOLs91VX9r5BkdN7TmYytHEgTqtokRAX33iM+50op+C/am6Tcp6tQ==",
+      "path": "microsoft.extensions.localization/7.0.17",
+      "hashPath": "microsoft.extensions.localization.7.0.17.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Localization.Abstractions/7.0.17": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+c3HY3m2VyGT8ec+jkKPmOWBnVMi/LGSZHq3AoTNFLoCG3xsuQKkNHHnjznDAtAm8JnP1HNQ4eA6pZzfNzrBKw==",
+      "path": "microsoft.extensions.localization.abstractions/7.0.17",
+      "hashPath": "microsoft.extensions.localization.abstractions.7.0.17.nupkg.sha512"
+    },
     "Microsoft.Extensions.Logging/7.0.0": {
       "type": "package",
       "serviceable": true,
@@ -1582,6 +1632,13 @@
       "sha512": "sha512-KZYeKBET/2Z0gY1WlTAK7+RHTl7GSbtvTLDXEZZojUdAPqpQNDL6tHv7VUpqfX5VEOh+uRGKaZXkuD253nEOBQ==",
       "path": "mono.texttemplating/2.2.1",
       "hashPath": "mono.texttemplating.2.2.1.nupkg.sha512"
+    },
+    "MudBlazor/6.21.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-bIHvrU0fkoQD4rZHQRZDDoxMUbJMozRzhpkSUZ/gWCXjmhT3PV/NiExkr+0tbokH7xzTnwOkKDevwXH9QBeoMw==",
+      "path": "mudblazor/6.21.0",
+      "hashPath": "mudblazor.6.21.0.nupkg.sha512"
     },
     "Newtonsoft.Json/13.0.1": {
       "type": "package",

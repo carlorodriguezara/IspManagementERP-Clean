@@ -25,8 +25,35 @@ namespace IspManagementERP.Client.Services.Identity
         public async Task<UserDto?> GetUserAsync(string id) => await _http.GetFromJsonAsync<UserDto>($"api/admin/identity/users/{id}");
 
         // CRUD usuarios
+        public async Task<UserDto?> GetUserDetailsAsync(string userId)
+        {
+            var resp = await _http.GetAsync($"api/admin/users/{userId}");
+            if (!resp.IsSuccessStatusCode) return null;
+            return await resp.Content.ReadFromJsonAsync<UserDto>();
+        }
+
+        public async Task<HttpResponseMessage> UpdateUserAsync(string userId, UpdateUserModel model)
+        {
+            return await _http.PutAsJsonAsync($"api/admin/users/{userId}", model);
+        }
+
+        public async Task<HttpResponseMessage> SuspendUserAsync(string userId)
+        {
+            return await _http.PostAsync($"api/admin/users/{userId}/suspend", null);
+        }
+
+        public async Task<HttpResponseMessage> EnableUserAsync(string userId)
+        {
+            return await _http.PostAsync($"api/admin/users/{userId}/enable", null);
+        }
+
+        public async Task<List<UserDto>?> GetAllUsersAsync()
+        {
+            var resp = await _http.GetAsync("api/admin/users/Todos");
+            if (!resp.IsSuccessStatusCode) return null;
+            return await resp.Content.ReadFromJsonAsync<List<UserDto>>();
+        }
         public async Task<HttpResponseMessage> CreateUserAsync(CreateUserModel model) => await _http.PostAsJsonAsync("api/admin/identity/users", model);
-        public async Task<HttpResponseMessage> UpdateUserAsync(string id, UpdateUserModel model) => await _http.PutAsJsonAsync($"api/admin/identity/users/{id}", model);
         public async Task<HttpResponseMessage> DeleteUserAsync(string id) => await _http.DeleteAsync($"api/admin/identity/users/{id}");
 
         // ROLES (listar global)

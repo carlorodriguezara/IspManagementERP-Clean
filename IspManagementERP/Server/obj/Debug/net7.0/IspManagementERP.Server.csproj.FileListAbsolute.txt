@@ -182,6 +182,8 @@ E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.Extension
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.Extensions.FileProviders.Embedded.dll
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.Extensions.Identity.Core.dll
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.Extensions.Identity.Stores.dll
+E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.Extensions.Localization.dll
+E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.Extensions.Localization.Abstractions.dll
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.Extensions.Logging.Abstractions.dll
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.Extensions.Options.dll
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.Identity.Client.dll
@@ -197,6 +199,7 @@ E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.JSInterop
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.SqlServer.Server.dll
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Microsoft.Win32.SystemEvents.dll
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Mono.TextTemplating.dll
+E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\MudBlazor.dll
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\Newtonsoft.Json.dll
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\System.CodeDom.dll
 E:\IspManagementERP\IspManagementERP\Server\bin\Debug\net7.0\System.Configuration.ConfigurationManager.dll

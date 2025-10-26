@@ -44,6 +44,14 @@ builder.Services.AddAuthorization(options =>
             ctx.User.HasClaim(c => c.Type == "permission" && c.Value == "reports.view")));
 });
 
+// Registrar IDbConnection para que cada inyección obtenga una nueva SqlConnection
+builder.Services.AddTransient<IDbConnection>(sp =>
+    new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Añade en Program.cs (Server)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IspManagementERP.Server.Data.ITenantProvider, IspManagementERP.Server.Data.TenantProvider>();
+
 builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
@@ -59,9 +67,10 @@ builder.Services.AddScoped<IdentityDataSeeder>();
 // Registrar ProfileService (si lo usas)
 builder.Services.AddScoped<Duende.IdentityServer.Services.IProfileService, IspManagementERP.Server.Service.ProfileService>();
 
-// Registrar IDbConnection para que cada inyección obtenga una nueva SqlConnection
-builder.Services.AddTransient<IDbConnection>(sp =>
-    new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Añade en Program.cs (Server)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IspManagementERP.Server.Data.ITenantProvider, IspManagementERP.Server.Data.TenantProvider>();
+
 
 // Registrar repo
 builder.Services.AddScoped<IIdentityAdminRepository, IdentityAdminRepository>();

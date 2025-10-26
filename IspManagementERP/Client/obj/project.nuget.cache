@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "qFu+llcH/lk=",
+  "dgSpecHash": "oRzdntZLkDc=",
   "success": true,
   "projectFilePath": "E:\\IspManagementERP\\IspManagementERP\\Client\\IspManagementERP.Client.csproj",
   "expectedPackageFiles": [
@@ -25,8 +25,8 @@
     "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.extensions.fileproviders.physical\\7.0.0\\microsoft.extensions.fileproviders.physical.7.0.0.nupkg.sha512",
     "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.extensions.filesystemglobbing\\7.0.0\\microsoft.extensions.filesystemglobbing.7.0.0.nupkg.sha512",
     "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.extensions.http\\7.0.0\\microsoft.extensions.http.7.0.0.nupkg.sha512",
-    "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.extensions.localization\\7.0.20\\microsoft.extensions.localization.7.0.20.nupkg.sha512",
-    "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.extensions.localization.abstractions\\7.0.20\\microsoft.extensions.localization.abstractions.7.0.20.nupkg.sha512",
+    "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.extensions.localization\\7.0.17\\microsoft.extensions.localization.7.0.17.nupkg.sha512",
+    "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.extensions.localization.abstractions\\7.0.17\\microsoft.extensions.localization.abstractions.7.0.17.nupkg.sha512",
     "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.extensions.logging\\7.0.0\\microsoft.extensions.logging.7.0.0.nupkg.sha512",
     "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\7.0.1\\microsoft.extensions.logging.abstractions.7.0.1.nupkg.sha512",
     "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.extensions.options\\7.0.1\\microsoft.extensions.options.7.0.1.nupkg.sha512",
@@ -36,7 +36,7 @@
     "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.net.illink.analyzers\\7.0.100-1.23211.1\\microsoft.net.illink.analyzers.7.0.100-1.23211.1.nupkg.sha512",
     "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.net.illink.tasks\\7.0.100-1.23211.1\\microsoft.net.illink.tasks.7.0.100-1.23211.1.nupkg.sha512",
     "C:\\Users\\Carlo\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\9.0.10\\microsoft.net.sdk.webassembly.pack.9.0.10.nupkg.sha512",
-    "C:\\Users\\Carlo\\.nuget\\packages\\mudblazor\\7.16.0\\mudblazor.7.16.0.nupkg.sha512",
+    "C:\\Users\\Carlo\\.nuget\\packages\\mudblazor\\6.21.0\\mudblazor.6.21.0.nupkg.sha512",
     "C:\\Users\\Carlo\\.nuget\\packages\\system.io.pipelines\\7.0.0\\system.io.pipelines.7.0.0.nupkg.sha512",
     "C:\\Users\\Carlo\\.nuget\\packages\\system.text.encodings.web\\7.0.0\\system.text.encodings.web.7.0.0.nupkg.sha512",
     "C:\\Users\\Carlo\\.nuget\\packages\\system.text.json\\7.0.0\\system.text.json.7.0.0.nupkg.sha512"
