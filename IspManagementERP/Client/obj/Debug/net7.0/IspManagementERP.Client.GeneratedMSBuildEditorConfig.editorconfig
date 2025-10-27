@@ -48,6 +48,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcQWRtaW5Vc2Vycy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/IspManagementERP/IspManagementERP/Client/Pages/Identity/ClaimDefinitionsPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcQ2xhaW1EZWZpbml0aW9uc1BhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/IspManagementERP/IspManagementERP/Client/Pages/Identity/ClaimsModal.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcQ2xhaW1zTW9kYWwucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
@@ -62,6 +66,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/IspManagementERP/IspManagementERP/Client/Pages/Identity/RoleAssignModal.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcUm9sZUFzc2lnbk1vZGFsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IspManagementERP/IspManagementERP/Client/Pages/Identity/RolesPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSWRlbnRpdHlcUm9sZXNQYWdlLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/IspManagementERP/IspManagementERP/Client/Pages/Index.razor]

@@ -58,9 +58,19 @@ namespace IspManagementERP.Client.Services.Identity
 
         // ROLES (listar global)
         public async Task<IEnumerable<string>> GetRolesAsync() => await _http.GetFromJsonAsync<IEnumerable<string>>("api/admin/identity/roles") ?? new List<string>();
+        // Rename role (PUT)
+        public async Task<HttpResponseMessage> UpdateRoleAsync(string oldRole, string newRoleName)
+        {
+            var encodedOld = System.Uri.EscapeDataString(oldRole);
+            return await _http.PutAsJsonAsync($"api/admin/identity/roles/{encodedOld}", newRoleName);
+        }
+
 
         // CREATE / DELETE role
-        public async Task<HttpResponseMessage> CreateRoleAsync(string role) => await _http.PostAsJsonAsync("api/admin/identity/roles", role);
+        public async Task<HttpResponseMessage> CreateRoleAsync(string role)
+        {
+           return await _http.PostAsJsonAsync("api/admin/identity/roles", role);
+        }
         public async Task<HttpResponseMessage> DeleteRoleAsync(string role) => await _http.DeleteAsync($"api/admin/identity/roles/{System.Uri.EscapeDataString(role)}");
 
         // USER ROLES (usado por RoleAssignModal)
@@ -103,6 +113,12 @@ namespace IspManagementERP.Client.Services.Identity
             {
                 throw new Exception($"GetAvailableClaims invalid JSON: {body}");
             }
+        }
+        // Update ClaimDefinition (PUT)
+        public async Task<HttpResponseMessage> UpdateClaimDefinitionAsync(ClaimDefinitionDTO dto)
+        {
+            // ClaimDefinitionDTO should have Id property
+            return await _http.PutAsJsonAsync($"api/admin/identity/claimdefinitions/{dto.Id}", dto);
         }
         // --- Claims (cliente) ---
         public async Task<IEnumerable<KeyValuePair<string, string>>> GetUserClaimsAsync(string userId)
@@ -154,7 +170,9 @@ namespace IspManagementERP.Client.Services.Identity
         }
 
         public async Task<HttpResponseMessage> CreateClaimDefinitionAsync(ClaimDefinitionDTO dto)
-            => await _http.PostAsJsonAsync("api/admin/identity/claimdefinitions", dto);
+        {
+            return await _http.PostAsJsonAsync("api/admin/identity/claimdefinitions", dto);
+        }
 
         public async Task<HttpResponseMessage> DeleteClaimDefinitionAsync(int id)
             => await _http.DeleteAsync($"api/admin/identity/claimdefinitions/{id}");

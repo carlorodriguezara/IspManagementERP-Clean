@@ -114,6 +114,23 @@ namespace IspManagementERP.Server.Controllers
             user.LastName = model.LastName;
             if (model.IsEnabled.HasValue) user.IsEnabled = model.IsEnabled.Value;
 
+            // NUEVO: guardar ProfilePictureBase64 en user.ProfilePicture (byte[])
+            if (!string.IsNullOrWhiteSpace(model.ProfilePictureBase64))
+            {
+                try
+                {
+                    var base64 = model.ProfilePictureBase64;
+                    // soportar data URL "data:image/png;base64,...."
+                    var comma = base64.IndexOf(',');
+                    if (comma >= 0) base64 = base64.Substring(comma + 1);
+                    user.ProfilePicture = Convert.FromBase64String(base64);
+                }
+                catch (FormatException)
+                {
+                    return BadRequest("ProfilePictureBase64 no es Base64 válido.");
+                }
+            }
+
             var res = await _userManager.UpdateAsync(user);
             if (!res.Succeeded) return BadRequest(string.Join("; ", res.Errors.Select(e => e.Description)));
             return NoContent();

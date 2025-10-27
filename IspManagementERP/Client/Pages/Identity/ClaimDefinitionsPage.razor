@@ -1,0 +1,191 @@
+﻿@page "/admin/claimdefinitions"
+@using IspManagementERP.Shared.Identity
+@inject IspManagementERP.Client.Services.Identity.UserService UserService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavManager
+@inject IDialogService DialogService
+
+<MudPaper Class="pa-4">
+    <div class="d-flex justify-space-between align-center mb-4">
+        <MudText Typo="Typo.h5">Gestión de Claim Definitions</MudText>
+        <div>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavManager.NavigateTo("/admin/users"))">Volver a Usuarios</MudButton>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <!-- Añadimos Immediate para que las variables se actualicen mientras tipeas -->
+        <div class="col-md-3">
+            <MudTextField @bind-Value="NewType" Label="Type" Immediate="true" />
+        </div>
+        <div class="col-md-4">
+            <MudTextField @bind-Value="NewValue" Label="Value" Immediate="true" />
+        </div>
+        <div class="col-md-4">
+            <MudTextField @bind-Value="NewDescription" Label="Description (opcional)" Immediate="true" />
+        </div>
+        <div class="col-md-1">
+            <MudButton Disabled="@(IsProcessing || string.IsNullOrWhiteSpace(NewType?.Trim()) || string.IsNullOrWhiteSpace(NewValue?.Trim()))" OnClick="CreateDefinition" Color="Color.Success">Crear</MudButton>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Error)) {<MudAlert Severity="Severity.Error">@Error</MudAlert>}
+
+    <MudTable Items="Definitions" Hover="true" Bordered="true">
+        <HeaderContent>
+            <MudTh>Type</MudTh>
+            <MudTh>Value</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh>Created</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>
+                @if (editId == context.Id)
+                {
+                    <MudTextField @bind-Value="editType" Immediate="true" />
+                }
+                else
+                {
+                    @context.Type
+                }
+            </MudTd>
+            <MudTd>
+                @if (editId == context.Id)
+                {
+                    <MudTextField @bind-Value="editValue" Immediate="true" />
+                }
+                else
+                {
+                    @context.Value
+                }
+            </MudTd>
+            <MudTd>
+                @if (editId == context.Id)
+                {
+                    <MudTextField @bind-Value="editDescription" Immediate="true" />
+                }
+                else
+                {
+                    @context.Description
+                }
+            </MudTd>
+            <MudTd>@context.CreatedAt.ToString("u")</MudTd>
+            <MudTd>
+                @if (editId == context.Id)
+                {
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small" OnClick="() => SaveEdit(context.Id)">Guardar</MudButton>
+                    <MudButton Color="Color.Secondary" Variant="Variant.Text" Size="Size.Small" OnClick="CancelEdit">Cancelar</MudButton>
+                }
+                else
+                {
+                    <MudButton Color="Color.Default" Variant="Variant.Outlined" Size="Size.Small" OnClick="() => StartEdit(context)">Editar</MudButton>
+                    <MudButton Color="Color.Error" Variant="Variant.Outlined" Size="Size.Small" OnClick="() => ConfirmDelete(context.Id)">Borrar</MudButton>
+                }
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<ClaimDefinitionDTO> Definitions = new();
+    private string NewType = "";
+    private string NewValue = "";
+    private string NewDescription = "";
+    private bool IsProcessing;
+    private string? Error;
+
+    private int? editId;
+    private string editType = "";
+    private string editValue = "";
+    private string editDescription = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDefs();
+    }
+
+    private async Task LoadDefs()
+    {
+        try { Definitions = (await UserService.GetClaimDefinitionsAsync()).ToList(); }
+        catch (Exception ex) { Error = ex.Message; }
+    }
+
+    private async Task CreateDefinition()
+    {
+        var type = NewType?.Trim();
+        var value = NewValue?.Trim();
+        if (string.IsNullOrWhiteSpace(type) || string.IsNullOrWhiteSpace(value))
+        {
+            Snackbar.Add("Type y Value son requeridos", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            IsProcessing = true;
+            var dto = new ClaimDefinitionDTO { Type = type, Value = value, Description = NewDescription?.Trim(), CreatedAt = DateTime.UtcNow };
+            var resp = await UserService.CreateClaimDefinitionAsync(dto);
+            if (!resp.IsSuccessStatusCode) { var text = await resp.Content.ReadAsStringAsync(); Error = $"Error creating: {resp.StatusCode} - {text}"; return; }
+            NewType = NewValue = NewDescription = "";
+            await LoadDefs();
+            Snackbar.Add("ClaimDefinition creada", Severity.Success);
+        }
+        catch (Exception ex) { Error = ex.Message; Snackbar.Add("Error: " + ex.Message, Severity.Error); }
+        finally { IsProcessing = false; }
+    }
+
+    private void StartEdit(ClaimDefinitionDTO dto)
+    {
+        editId = dto.Id;
+        editType = dto.Type;
+        editValue = dto.Value;
+        editDescription = dto.Description;
+    }
+
+    private void CancelEdit()
+    {
+        editId = null;
+        editType = editValue = editDescription = "";
+    }
+
+    private async Task SaveEdit(int id)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(editType) || string.IsNullOrWhiteSpace(editValue)) { Snackbar.Add("Type y Value son requeridos", Severity.Warning); return; }
+            IsProcessing = true;
+            var dto = new ClaimDefinitionDTO { Id = id, Type = editType.Trim(), Value = editValue.Trim(), Description = editDescription?.Trim(), CreatedAt = Definitions.First(d => d.Id == id).CreatedAt };
+            var resp = await UserService.UpdateClaimDefinitionAsync(dto);
+            if (!resp.IsSuccessStatusCode) { var txt = await resp.Content.ReadAsStringAsync(); Error = $"Error actualizando: {resp.StatusCode} - {txt}"; return; }
+            Snackbar.Add("ClaimDefinition actualizada", Severity.Success);
+            editId = null;
+            await LoadDefs();
+        }
+        catch (Exception ex) { Error = ex.Message; Snackbar.Add("Error: " + ex.Message, Severity.Error); }
+        finally { IsProcessing = false; }
+    }
+
+    private async Task ConfirmDelete(int id)
+    {
+        var parameters = new DialogParameters { ["Message"] = "¿Borrar claim definition?" };
+        var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.ExtraSmall };
+        var dialog = DialogService.Show<DeleteConfirm>("Confirmar", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Cancelled && result.Data is bool ok && ok) await DeleteDefinition(id);
+    }
+
+    private async Task DeleteDefinition(int id)
+    {
+        try
+        {
+            IsProcessing = true;
+            var resp = await UserService.DeleteClaimDefinitionAsync(id);
+            if (!resp.IsSuccessStatusCode) { var text = await resp.Content.ReadAsStringAsync(); Error = $"Error deleting: {resp.StatusCode} - {text}"; return; }
+            await LoadDefs();
+            Snackbar.Add("ClaimDefinition borrada", Severity.Success);
+        }
+        catch (Exception ex) { Error = ex.Message; Snackbar.Add("Error: " + ex.Message, Severity.Error); }
+        finally { IsProcessing = false; }
+    }
+}

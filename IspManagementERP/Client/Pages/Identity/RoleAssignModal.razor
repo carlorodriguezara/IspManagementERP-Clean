@@ -1,6 +1,7 @@
 ﻿@using MudBlazor
 @inject IspManagementERP.Client.Services.Identity.UserService UserService
 @inject ISnackbar Snackbar
+@inject NavigationManager NavManager
 
 <MudDialog>
     <DialogContent>
@@ -55,6 +56,10 @@
                 </div>
             }
         }
+
+        <div class="mt-3 d-flex gap-2">
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="@OpenCreateRolePage">Crear rol</MudButton>
+        </div>
 
         @if (!string.IsNullOrEmpty(Error))
         {
@@ -158,4 +163,14 @@
     }
 
     private void Close() => MudDialog.Close();
+
+    // Navegar a la pagina global de Roles, pasamos returnTo para volver y userId para reabrir modal
+    private void OpenCreateRolePage()
+    {
+        var returnTo = NavManager.Uri;
+        var url = $"/admin/roles?returnTo={Uri.EscapeDataString(returnTo)}&userId={Uri.EscapeDataString(UserId)}&modal=roles";
+        NavManager.NavigateTo(url);
+        // cerramos modal para que el usuario trabaje en la página de Roles.
+        MudDialog.Close();
+    }
 }

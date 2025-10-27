@@ -1,0 +1,162 @@
+﻿@page "/admin/roles"
+@using IspManagementERP.Shared.Identity
+@inject IspManagementERP.Client.Services.Identity.UserService UserService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavManager
+@inject IDialogService DialogService
+
+<MudPaper Class="pa-4">
+    <div class="d-flex justify-space-between align-center mb-4">
+        <MudText Typo="Typo.h5">Gestión de Roles</MudText>
+        <div>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavManager.NavigateTo("/admin/users"))">Volver a Usuarios</MudButton>
+        </div>
+    </div>
+
+    <div class="mb-3 d-flex gap-2 align-end">
+        <!-- Immediate=true para que NewRole se actualice en cada tecla -->
+        <MudTextField @bind-Value="NewRole" Label="Nuevo rol" Immediate="true" />
+        <!-- Disabled robusto: trim y null-safe -->
+        <MudButton Disabled="@(IsProcessing || string.IsNullOrWhiteSpace(NewRole?.Trim()))" OnClick="CreateRole" Color="Color.Success">Crear</MudButton>
+
+    </div>
+
+    @if (!string.IsNullOrEmpty(Error)) {<MudAlert Severity="Severity.Error">@Error</MudAlert>}
+
+    <MudTable Items="roles" Hover="true" Bordered="true">
+        <HeaderContent>
+            <MudTh>Role</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Rol">
+                @if (editRole == context)
+                {
+                    <MudTextField @bind-Value="editRoleNewName" Immediate="true" />
+                }
+                else
+                {
+                    @context
+                }
+            </MudTd>
+            <MudTd>
+                @if (editRole == context)
+                {
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small" OnClick="() => SaveEdit(context)">Guardar</MudButton>
+                    <MudButton Color="Color.Secondary" Variant="Variant.Text" Size="Size.Small" OnClick="CancelEdit">Cancelar</MudButton>
+                }
+                else
+                {
+                    <MudButton Color="Color.Default" Variant="Variant.Outlined" Size="Size.Small" OnClick="() => StartEdit(context)">Editar</MudButton>
+                    <MudButton Color="Color.Error" Variant="Variant.Outlined" Size="Size.Small" OnClick="() => ConfirmDelete(context)">Borrar</MudButton>
+                }
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<string> roles = new();
+    private string NewRole = "";
+    private bool IsProcessing;
+    private string? Error;
+
+    private string? editRole;
+    private string editRoleNewName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRolesAsync();
+    }
+
+    private async Task LoadRolesAsync()
+    {
+        try { roles = (await UserService.GetRolesAsync())?.ToList() ?? new List<string>(); }
+        catch (Exception ex) { Error = ex.Message; }
+    }
+
+    private async Task CreateRole()
+    {
+        // protección extra: trim al enviar
+        var roleToCreate = NewRole?.Trim();
+        if (string.IsNullOrWhiteSpace(roleToCreate))
+        {
+            Snackbar.Add("Ingrese un nombre de rol válido.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            IsProcessing = true;
+            var resp = await UserService.CreateRoleAsync(roleToCreate);
+            if (!resp.IsSuccessStatusCode)
+            {
+                var txt = await resp.Content.ReadAsStringAsync();
+                Error = $"Error creando rol: {resp.StatusCode} - {txt}";
+                return;
+            }
+            NewRole = "";
+            await LoadRolesAsync();
+            Snackbar.Add("Rol creado", Severity.Success);
+        }
+        catch (Exception ex) { Error = ex.Message; Snackbar.Add("Error: " + ex.Message, Severity.Error); }
+        finally { IsProcessing = false; }
+    }
+
+    private void StartEdit(string role)
+    {
+        editRole = role;
+        editRoleNewName = role;
+    }
+
+    private void CancelEdit()
+    {
+        editRole = null;
+        editRoleNewName = "";
+    }
+
+    private async Task SaveEdit(string oldRole)
+    {
+        if (string.IsNullOrWhiteSpace(editRoleNewName?.Trim())) { Snackbar.Add("Nombre requerido", Severity.Warning); return; }
+        try
+        {
+            IsProcessing = true;
+            var resp = await UserService.UpdateRoleAsync(oldRole, editRoleNewName.Trim());
+            if (!resp.IsSuccessStatusCode)
+            {
+                var txt = await resp.Content.ReadAsStringAsync();
+                Error = $"Error renombrando rol: {resp.StatusCode} - {txt}";
+                return;
+            }
+            Snackbar.Add("Rol renombrado", Severity.Success);
+            editRole = null;
+            editRoleNewName = "";
+            await LoadRolesAsync();
+        }
+        catch (Exception ex) { Error = ex.Message; Snackbar.Add("Error: " + ex.Message, Severity.Error); }
+        finally { IsProcessing = false; }
+    }
+
+    private async Task ConfirmDelete(string role)
+    {
+        var parameters = new DialogParameters { ["Message"] = $"¿Borrar rol '{role}'?" };
+        var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.ExtraSmall };
+        var dialog = DialogService.Show<DeleteConfirm>("Confirmar", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Cancelled && result.Data is bool ok && ok) await DeleteRole(role);
+    }
+
+    private async Task DeleteRole(string role)
+    {
+        try
+        {
+            IsProcessing = true;
+            var resp = await UserService.DeleteRoleAsync(role);
+            if (!resp.IsSuccessStatusCode) { var txt = await resp.Content.ReadAsStringAsync(); Error = $"Error borrando rol: {resp.StatusCode} - {txt}"; return; }
+            await LoadRolesAsync();
+            Snackbar.Add("Rol borrado", Severity.Success);
+        }
+        catch (Exception ex) { Error = ex.Message; Snackbar.Add("Error: " + ex.Message, Severity.Error); }
+        finally { IsProcessing = false; }
+    }
+}

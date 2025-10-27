@@ -1,10 +1,11 @@
 ﻿@using MudBlazor
 @inject IspManagementERP.Client.Services.Identity.UserService UserService
 @inject ISnackbar Snackbar
+@inject NavigationManager NavManager
 
 <MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.h6">Claims — @UserEmail</MudText>
+        <MudText Typo="Typo.h6">Roles — @UserEmail</MudText>
         <MudDivider Class="my-2" />
 
         @if (IsLoading)
@@ -16,19 +17,19 @@
         else
         {
             <MudText Typo="Typo.subtitle2" Class="mb-1">Asignados</MudText>
-            @if (UserClaims == null || !UserClaims.Any())
+            @if (UserRoles == null || !UserRoles.Any())
             {
-                <MudText color="Color.Secondary">No tiene claims.</MudText>
+                <MudText color="Color.Secondary">No tiene roles.</MudText>
             }
             else
             {
                 <MudList Dense="true">
-                    @foreach (var c in UserClaims)
+                    @foreach (var r in UserRoles)
                     {
                         <MudListItem>
-                            <MudText>@c.Key: @c.Value</MudText>
+                            <MudText>@r</MudText>
                             <MudSpacer />
-                            <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" OnClick="() => RemoveClaim(c.Key, c.Value)" Disabled="@IsProcessing">Quitar</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" OnClick="() => RemoveRole(r)" Disabled="@IsProcessing">Quitar</MudButton>
                         </MudListItem>
                     }
                 </MudList>
@@ -36,13 +37,29 @@
 
             <MudDivider Class="my-2" />
 
-            <MudText Typo="Typo.subtitle2" Class="mb-1">Agregar claim</MudText>
-            <div class="d-flex gap-2 align-center">
-                <MudTextField @bind-Value="NewClaimType" Placeholder="Tipo" />
-                <MudTextField @bind-Value="NewClaimValue" Placeholder="Valor" />
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddClaim" Disabled="@IsProcessing">Agregar</MudButton>
-            </div>
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Disponibles</MudText>
+            @if (AllRoles == null || !AllRoles.Any())
+            {
+                <MudText color="Color.Secondary">No roles definidos.</MudText>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var r in AllRoles.Except(UserRoles ?? Enumerable.Empty<string>()))
+                    {
+                        <div class="d-flex align-center">
+                            <MudText>@r</MudText>
+                            <MudSpacer />
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="() => AddRole(r)" Disabled="@IsProcessing">Asignar</MudButton>
+                        </div>
+                    }
+                </div>
+            }
         }
+
+        <div class="mt-3 d-flex gap-2">
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="@OpenCreateRolePage">Crear rol</MudButton>
+        </div>
 
         @if (!string.IsNullOrEmpty(Error))
         {
@@ -62,24 +79,24 @@
 
     private bool IsLoading;
     private bool IsProcessing;
-    private string NewClaimType = "";
-    private string NewClaimValue = "";
-    private List<KeyValuePair<string, string>> UserClaims = new();
+    private List<string> AllRoles = new();
+    private HashSet<string> UserRoles = new();
     private string? Error;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadClaimsAsync();
+        await LoadRolesAsync();
     }
 
-    private async Task LoadClaimsAsync()
+    private async Task LoadRolesAsync()
     {
         try
         {
             IsLoading = true;
             Error = null;
-            var claims = await UserService.GetUserClaimsAsync(UserId);
-            UserClaims = claims?.Select(kv => new KeyValuePair<string, string>(kv.Key, kv.Value)).ToList() ?? new List<KeyValuePair<string, string>>();
+            AllRoles = (await UserService.GetRolesAsync())?.ToList() ?? new List<string>();
+            var ur = await UserService.GetUserRolesAsync(UserId);
+            UserRoles = new HashSet<string>(ur ?? Enumerable.Empty<string>());
         }
         catch (Exception ex)
         {
@@ -91,24 +108,22 @@
         }
     }
 
-    private async Task AddClaim()
+    private async Task AddRole(string role)
     {
         try
         {
             IsProcessing = true;
-            var resp = await UserService.AddUserClaimAsync(UserId, new KeyValuePair<string,string>(NewClaimType, NewClaimValue));
+            var resp = await UserService.AddUserRoleAsync(UserId, role);
             if (!resp.IsSuccessStatusCode)
             {
                 var txt = await resp.Content.ReadAsStringAsync();
-                Snackbar.Add($"Error agregando claim: {txt}", Severity.Error);
+                Snackbar.Add($"Error asignando rol: {txt}", Severity.Error);
             }
             else
             {
-                Snackbar.Add("Claim agregado", Severity.Success);
-                NewClaimType = "";
-                NewClaimValue = "";
+                Snackbar.Add($"Rol '{role}' asignado", Severity.Success);
             }
-            await LoadClaimsAsync();
+            await LoadRolesAsync();
         }
         catch (Exception ex)
         {
@@ -120,22 +135,22 @@
         }
     }
 
-    private async Task RemoveClaim(string type, string value)
+    private async Task RemoveRole(string role)
     {
         try
         {
             IsProcessing = true;
-            var resp = await UserService.RemoveUserClaimAsync(UserId, type, value);
+            var resp = await UserService.RemoveUserRoleAsync(UserId, role);
             if (!resp.IsSuccessStatusCode)
             {
                 var txt = await resp.Content.ReadAsStringAsync();
-                Snackbar.Add($"Error quitando claim: {txt}", Severity.Error);
+                Snackbar.Add($"Error quitando rol: {txt}", Severity.Error);
             }
             else
             {
-                Snackbar.Add("Claim removido", Severity.Success);
+                Snackbar.Add($"Rol '{role}' removido", Severity.Success);
             }
-            await LoadClaimsAsync();
+            await LoadRolesAsync();
         }
         catch (Exception ex)
         {
@@ -148,4 +163,14 @@
     }
 
     private void Close() => MudDialog.Close();
+
+    // Navegar a la pagina global de Roles, pasamos returnTo para volver y userId para reabrir modal
+    private void OpenCreateRolePage()
+    {
+        var returnTo = NavManager.Uri;
+        var url = $"/admin/roles?returnTo={Uri.EscapeDataString(returnTo)}&userId={Uri.EscapeDataString(UserId)}&modal=roles";
+        NavManager.NavigateTo(url);
+        // cerramos modal para que el usuario trabaje en la página de Roles.
+        MudDialog.Close();
+    }
 }

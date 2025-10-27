@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("IspManagementERP.Shared")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+72d37ee329f8b2f8a376713e27e699be3caeec01")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4e5fd555c676454f9360690550d84dd93e243b42")]
 [assembly: System.Reflection.AssemblyProductAttribute("IspManagementERP.Shared")]
 [assembly: System.Reflection.AssemblyTitleAttribute("IspManagementERP.Shared")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

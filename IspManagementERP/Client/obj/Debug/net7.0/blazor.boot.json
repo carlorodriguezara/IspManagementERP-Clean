@@ -1,7 +1,7 @@
 {
   "entryAssembly": "IspManagementERP.Client",
   "resources": {
-    "hash": "sha256-uL5jiDDUnISQo/RKVOv0CebGb4z2aZeKSFkHrdfhRbg=",
+    "hash": "sha256-xBmN9X/wZ47zDDOxU1A7L24G/RfIAzJ1UMBT/Me5rQw=",
     "runtime": {
       "dotnet.js": "sha256-eaJTmow4t8eE7FZMZR5Ja41JMOefGCbIYDTdpclGsac=",
       "dotnet.timezones.blat": "sha256-gbATD5HDsHYtW8vdPYh9iSBY4O5CjvMeCSF5xXWF1xo=",
@@ -20,6 +20,7 @@
       "Microsoft.AspNetCore.Components.WebAssembly.dll": "sha256-9gmqP75CqNu9VJzOiKwIjpdOntiZJb7bgyk3O/9B/4E=",
       "Microsoft.AspNetCore.Components.WebAssembly.Authentication.dll": "sha256-vHGmvAdEyeEbfSOZGX9W69HnB8e9c0gDJSmLbsY2zmI=",
       "Microsoft.AspNetCore.Metadata.dll": "sha256-39jRMiE9R8zt3/hxcXhm8VIhHBNviDPyye7v4iydqA4=",
+      "Microsoft.AspNetCore.WebUtilities.dll": "sha256-nhQO280iI7OH2q086KEh75GaFolA0++HxfL82nj7F74=",
       "Microsoft.Extensions.Configuration.dll": "sha256-PqQvp77oZ4+uuy2ElXk8AU9I6RfZSf18UGTrd4rulOo=",
       "Microsoft.Extensions.Configuration.Abstractions.dll": "sha256-CnS3b9EMFQmETBUVEgtcron4DBsfFdcVt3zfCP6Uflg=",
       "Microsoft.Extensions.Configuration.Binder.dll": "sha256-7GY9+7Cm0Z8DJ+JCFwgCx9OfFtUvXlFHaaLlBYmXfIE=",
@@ -36,11 +37,13 @@
       "Microsoft.Extensions.Logging.dll": "sha256-WMsuY8rhtg+vvssGFSR7ZLKhqYPAzOi538IXMoiJ6bI=",
       "Microsoft.Extensions.Logging.Abstractions.dll": "sha256-7mzUlhcvGxpAVO4h/Tka7P/8IXF9ZsHkGt0fp5aufkU=",
       "Microsoft.Extensions.Options.dll": "sha256-gcHJrSv1wTqvF9SyWTEKcbiShn4mkgfnm9+tRQr4OqY=",
-      "Microsoft.Extensions.Primitives.dll": "sha256-q4ruoDSCjV/QJY9ZkzV6uxvEvZUVrDbyUjU3SSh5SlE=",
+      "Microsoft.Extensions.Primitives.dll": "sha256-seZkkGFvJSZtenptwTnqn8hg73jxbtU0sd5DUGYXkTs=",
       "Microsoft.JSInterop.dll": "sha256-SYwgRHWmHVxYVoOX6AxFFFQMh6sXqrcw1Wie3yYufB8=",
       "Microsoft.JSInterop.WebAssembly.dll": "sha256-K0gSYhzDMDv8ujbvtBKD/x91DgZTp1Li3aJpfgNsQtQ=",
+      "Microsoft.Net.Http.Headers.dll": "sha256-3ka/URcuxi84edu4FXrvIaA+XRz7PFf8zqkozwRxcuI=",
       "MudBlazor.dll": "sha256-mJj3khMPSXcRQ8MnVHddCeShlpFo9hXWkPa91aeaW7A=",
       "System.IO.Pipelines.dll": "sha256-P/MqD0fCBd5bgTM16JC1QC/Zz7s+CwViyzmDFkBG4/c=",
+      "System.Text.Encodings.Web.dll": "sha256-cuXJCAMxWcZ2EaBvm9vFAVMtBPzaPrEpZ7uiS9kjUPQ=",
       "Microsoft.CSharp.dll": "sha256-6V4GfO5zHzzbEf480NtrHxZo3KX5ZAFCJUG6sEqKTp8=",
       "Microsoft.VisualBasic.Core.dll": "sha256-3ypmvZcaGs6rLStwq7m4D+pVXoLIhws2VMHGiwlhlJs=",
       "Microsoft.VisualBasic.dll": "sha256-Fi846vtrxGsCYCvXfN7sJepzN6W723M0ArHv8gszLKM=",
@@ -176,7 +179,6 @@
       "System.Text.Encoding.CodePages.dll": "sha256-l8iTH6ZJim6JsamgOcrSk2hVZs/sLHk1DEXPpCH+zUw=",
       "System.Text.Encoding.Extensions.dll": "sha256-qrL/+A3W/Zwg7yNBhdk0B/4tJpC3akn/hxQj3YijBoA=",
       "System.Text.Encoding.dll": "sha256-qYNeekNuw2atjVTkv1DFCEtWUeG8OdC6LzIL5gj1Ves=",
-      "System.Text.Encodings.Web.dll": "sha256-VN0WgwNzlWCvW3InXrQGxMIOJakxADab0O/EIv/DPvM=",
       "System.Text.Json.dll": "sha256-A0kNCBPDcFQxPNZdDq8nYHqobFkLehLafFYEyRWtAbY=",
       "System.Text.RegularExpressions.dll": "sha256-96Y7lXGtmAbuqlzfkUImv4DbRqCDkWUfLZXM3Pl294c=",
       "System.Threading.Channels.dll": "sha256-yvi8OoLraeQ66ntVzRGztHtjHF6Tu9OVOLjv+2sIJqY=",
@@ -209,12 +211,12 @@
       "mscorlib.dll": "sha256-HYyp9hO+GKFyupcEiY1PxtBBXbHzefsO3Q8RiQTaNCA=",
       "netstandard.dll": "sha256-N5CcC3sLzGBesbmeJAp5bwxABN9u7SwkIO5qfFjzoik=",
       "System.Private.CoreLib.dll": "sha256-bJS1DJmhjP7PvegYG+Z8O9EDtRY78HKinA3LUMVLlSQ=",
-      "IspManagementERP.Shared.dll": "sha256-3JzM86WXc86bAX3aaVupEw07Asu/aHpeSV014wpz71U=",
-      "IspManagementERP.Client.dll": "sha256-ERFhx+tf6CaHgeFWOW13o+dCD97E/IYbjFdohTcPcyE="
+      "IspManagementERP.Shared.dll": "sha256-cN7pdQe32gIOWV7iPdsEdKx9KYMnz4TOxLZDhXEWMxY=",
+      "IspManagementERP.Client.dll": "sha256-fx8u9vHe65OZVUeM8mCNbMDVS7zAU+OMFwNV4PnwdP0="
     },
     "pdb": {
-      "IspManagementERP.Shared.pdb": "sha256-AiY/P4eFf1V4DwWuiTxkSQFXLTIXtohgmEbP8b1akbc=",
-      "IspManagementERP.Client.pdb": "sha256-Hy7RKPIkZ9cEg/YnpKObZNxqHQz9sze3lFB0pAmwLWM="
+      "IspManagementERP.Shared.pdb": "sha256-73o0HOIT66cXCF3BwiW13iqzF4RhDcOL4WpiRhqlFFg=",
+      "IspManagementERP.Client.pdb": "sha256-9MkpChIas/iNu4FXUWA9PEdxEt9PfSptLjYtc4Vhy94="
     },
     "runtimeAssets": {
       "dotnet.wasm": {
