@@ -1,12 +1,14 @@
 ﻿@page "/admin/users"
 @using IspManagementERP.Shared.Identity
 @using IspManagementERP.Client.Shared
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
 @inject IspManagementERP.Client.Services.Identity.UserService UserService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager NavManager
+@attribute [Authorize]
 
 <MudPaper Class="pa-4">
     <div class="d-flex justify-space-between align-center mb-4">
@@ -145,11 +147,70 @@
     }
 
     // Actions (same as before)
-    private async Task EditUser(string userId) { /* ... existing code ... */ }
-    private async Task CreateUser() { /* ... existing code ... */ }
-    private async Task ConfirmSuspend(string userId, string? email) { /* ... existing code ... */ }
-    private async Task SuspendUser(string userId) { /* ... existing code ... */ }
-    private async Task EnableUser(string userId) { /* ... existing code ... */ }
+    private async Task EditUser(string userId) 
+    { 
+        var parameters = new DialogParameters { ["UserId"] = userId };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<EditUserModal>($"Editar — {userId}", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+            await LoadUsersAsync();
+    }
+    private async Task CreateUser() 
+    {
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<EditUserModal>("Crear usuario", options);
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+            await LoadUsersAsync();
+    }
+    private async Task ConfirmSuspend(string userId, string? email) 
+    { 
+        var parameters = new DialogParameters { ["Message"] = $"¿Suspender usuario {email}?" };
+        var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.ExtraSmall };
+        var dialog = DialogService.Show<DeleteConfirm>("Confirmar", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Cancelled && result.Data is bool confirmed && confirmed)
+            await SuspendUser(userId);
+    }
+    private async Task SuspendUser(string userId) 
+    { 
+        try
+        {
+            var resp = await UserService.SuspendUserAsync(userId);
+            if (resp.IsSuccessStatusCode)
+                Snackbar.Add("Usuario suspendido", Severity.Success);
+            else
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                Snackbar.Add($"Error suspendiendo usuario: {resp.StatusCode} - {body}", Severity.Error);
+            }
+            await LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error: " + ex.Message, Severity.Error);
+        }
+    }
+    private async Task EnableUser(string userId) 
+    { 
+        try
+        {
+            var resp = await UserService.EnableUserAsync(userId);
+            if (resp.IsSuccessStatusCode)
+                Snackbar.Add("Usuario habilitado", Severity.Success);
+            else
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                Snackbar.Add($"Error habilitando usuario: {resp.StatusCode} - {body}", Severity.Error);
+            }
+            await LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error: " + ex.Message, Severity.Error);
+        }
+    }
 
     private async Task OpenRoleAssign(string userId, string? email)
     {
