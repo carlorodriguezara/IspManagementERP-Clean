@@ -1,55 +1,47 @@
-# Build results
-bin/
-obj/
+# .gitignore para IspManagementERP (NET + Blazor + Node)
 
-# User-specific files
-*.user
+# Visual Studio / Rider / VSCode
+.vs/
+.vscode/
+.idea/
 *.suo
+*.user
 *.userosscache
 *.sln.docstates
 
-# Mono Auto Generated Files
-mono_crash.*
+# Build artefacts
+bin/
+obj/
+*/bin/
+*/obj/
 
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
+# Visual Studio publish
+*.pubxml
+*.publish.xml
 
-# Visual Studio 2015/2017/2019/2022 cache/options directory
-.vs/
-.vscode/
-
-# Visual Studio 2017 auto generated files
-Generated\ Files/
-
-# DotCover
-.idea/
-*.dotCover
-
-# Rider
-.idea/
-*.sln.iml
-
-# Others
-*.dbmdl
-*.bak
-*.backup
-*.log
-*.vspscc
-*.vssscc
-*.ncb
-*.sdf
-*.cachefile
+# ASP.NET / .NET
+appsettings*.json
 *.db
-*.psess
-*.vsp
-*.pdb
+*.db-journal
 
-# Entity Framework
-Migrations/
+# Blazor / static webassets
+wwwroot/_framework/
 
-# Azure Functions local settings file
-local.settings.json
+# NuGet
+*.nupkg
+packages/
 
-# Others
-*.swp
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.pnpm-debug.log
+
+# Logs
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
