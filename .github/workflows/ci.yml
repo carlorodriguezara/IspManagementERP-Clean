@@ -1,4 +1,4 @@
-# Minimal CI to validate .NET 7 build/tests while we debug the client steps.
+# CI: .NET 7 build/tests + safe client detection (npm ci / npm test) - Step 2.1
 on:
   push:
     branches: [ "main", "master", "develop" ]
@@ -20,18 +20,58 @@ jobs:
         with:
           dotnet-version: 7.0.x
 
-      - name: Restore
+      - name: Restore .NET
         run: dotnet restore
 
-      - name: Build
+      - name: Build .NET solution
         run: dotnet build --configuration Release --no-restore
 
-      - name: Test
+      - name: Run .NET tests
         run: dotnet test --configuration Release --no-build --logger "trx;LogFileName=tests.trx" --results-directory ./test-results
 
-      - name: Upload test results
+      - name: Upload dotnet test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-test-results
           path: ./test-results
+
+      # -------------------------
+      # Client detection + npm steps (Step 2.1)
+      # -------------------------
+      - name: Detect client package.json (IspManagementERP.Client)
+        id: detect-client
+        run: |
+          if [ -f "./IspManagementERP.Client/package.json" ]; then
+            echo "client_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "client_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install client dependencies (npm ci)
+        if: ${{ steps.detect-client.outputs.client_exists == 'true' }}
+        working-directory: ./IspManagementERP.Client
+        run: |
+          echo "package.json found, running npm ci..."
+          npm ci
+
+      - name: Run client tests (npm test) if test script exists
+        if: ${{ steps.detect-client.outputs.client_exists == 'true' }}
+        working-directory: ./IspManagementERP.Client
+        run: |
+          # ejecuta npm test solo si package.json contiene "test" en scripts
+          if grep -q "\"test\"" package.json; then
+            echo "test script found, running npm test..."
+            npm test --if-present
+          else
+            echo "no test script found in package.json, skipping npm test"
+          fi
+
+      - name: Upload client test artifacts (if any)
+        if: ${{ steps.detect-client.outputs.client_exists == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-artifacts
+          path: |
+            IspManagementERP.Client/test-results
+            IspManagementERP.Client/playwright-report
