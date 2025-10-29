@@ -17,7 +17,7 @@
         <!-- Immediate=true para que NewRole se actualice en cada tecla -->
         <MudTextField @bind-Value="NewRole" Label="Nuevo rol" Immediate="true" />
         <!-- Disabled robusto: trim y null-safe -->
-        <MudButton Disabled="@(IsProcessing || string.IsNullOrWhiteSpace(NewRole?.Trim()))" OnClick="CreateRole" Color="Color.Success">Crear</MudButton>
+        <MudButton OnClick="CreateRole" Color="Color.Success">Crear</MudButton>
 
     </div>
 

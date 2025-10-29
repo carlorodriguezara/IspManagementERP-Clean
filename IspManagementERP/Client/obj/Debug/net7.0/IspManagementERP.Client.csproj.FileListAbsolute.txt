@@ -1725,6 +1725,6 @@ E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\IspManagementERP.Cl
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\refint\IspManagementERP.Client.dll
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\IspManagementERP.Client.pdb
 E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\ref\IspManagementERP.Client.dll
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\evjr29yy5v-h03tcwq6kt.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\o54a1kzrbc-otir621uxa.gz
-E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\tt4pxv8ehc-wukm2824ew.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\evjr29yy5v-26crlasqrb.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\o54a1kzrbc-l7zzk7fzrx.gz
+E:\IspManagementERP\IspManagementERP\Client\obj\Debug\net7.0\compressed\tt4pxv8ehc-ax82bcluqc.gz

@@ -25,7 +25,7 @@
             <MudTextField @bind-Value="NewDescription" Label="Description (opcional)" Immediate="true" />
         </div>
         <div class="col-md-1">
-            <MudButton Disabled="@(IsProcessing || string.IsNullOrWhiteSpace(NewType?.Trim()) || string.IsNullOrWhiteSpace(NewValue?.Trim()))" OnClick="CreateDefinition" Color="Color.Success">Crear</MudButton>
+            <MudButton OnClick="CreateDefinition" Color="Color.Success">Crear</MudButton>
         </div>
     </div>
 
@@ -86,6 +86,7 @@
         </RowTemplate>
     </MudTable>
 </MudPaper>
+
 
 @code {
     private List<ClaimDefinitionDTO> Definitions = new();
