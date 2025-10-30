@@ -15,8 +15,15 @@ using Microsoft.Data.SqlClient;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+// Use DefaultConnection from configuration for DI registration
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+// Register main application DB contexts
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// Register the large scaffolded context (IspSolutionsContext) so it's resolved by DI
+builder.Services.AddDbContext<IspSolutionsContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -48,7 +55,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddTransient<IDbConnection>(sp =>
     new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Añade en Program.cs (Server)
+// Registrar services/tenancy
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IspManagementERP.Server.Data.ITenantProvider, IspManagementERP.Server.Data.TenantProvider>();
 
@@ -61,33 +68,26 @@ builder.Services.AddAuthentication()
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-//Seed identity data kept registered but NOT executed automatically
+// Seed identity data kept registered but NOT executed automatically
 builder.Services.AddScoped<IdentityDataSeeder>();
 
 // Registrar ProfileService (si lo usas)
 builder.Services.AddScoped<Duende.IdentityServer.Services.IProfileService, IspManagementERP.Server.Service.ProfileService>();
 
-// Añade en Program.cs (Server)
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IspManagementERP.Server.Data.ITenantProvider, IspManagementERP.Server.Data.TenantProvider>();
-
-
 // Registrar repo
 builder.Services.AddScoped<IIdentityAdminRepository, IdentityAdminRepository>();
 
-// en la configuración de servicios
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClientWithCredentials", policy =>
     {
-        policy.WithOrigins("https://localhost:7234", "https://localhost:5001") // -> pon aquí el origen del client EXACTO
+        policy.WithOrigins("https://localhost:7234", "https://localhost:5001")
               .AllowCredentials()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
-
-// Asegúrate de que AddIdentity / UserManager / RoleManager ya están registrados (AddIdentity<ApplicationUser, IdentityRole>() ...)
 
 var app = builder.Build();
 
@@ -110,7 +110,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// IMPORTANT: order matters
+// IMPORTANT: order matters for IdentityServer/Authentication/Authorization
 app.UseIdentityServer();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -121,11 +121,23 @@ app.MapControllers();
 app.UseCors("AllowClientWithCredentials");
 app.MapFallbackToFile("index.html");
 
-// Apply pending migrations at startup
-using (var scope = app.Services.CreateScope())
+// Apply pending migrations at startup ONLY in Development to avoid accidental schema changes in Prod.
+// For production we will apply migrations via CI/CD runbook (backup -> migrate -> deploy).
+if (app.Environment.IsDevelopment())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    using (var scope = app.Services.CreateScope())
+    {
+        // Migrate Identity DB
+        var appDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        appDb.Database.Migrate();
+
+        // Migrate IspSolutionsContext if registered
+        var ispDb = scope.ServiceProvider.GetService<IspSolutionsContext>();
+        if (ispDb != null)
+        {
+            ispDb.Database.Migrate();
+        }
+    }
 }
 
 // NOTE: Dev seeding removed from automatic startup. Run IdentityDataSeeder manually if needed.
