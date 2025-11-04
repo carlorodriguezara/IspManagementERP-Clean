@@ -7,13 +7,14 @@ class Program
     static int Main(string[] args)
     {
         // Lee la cadena de conexión desde la variable de entorno (el workflow pasa el secret a esta variable)
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Default");
+        // Cambiado para leer la variable ConnectionStrings__DefaultConnection (coincide con lo que estás definiendo)
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("❌ ERROR: No se encontró la variable de entorno 'ConnectionStrings__Default'.");
-            Console.WriteLine("Asegúrate de pasarla como secret en el workflow (ej: AZURE_SQL_CONNECTION) y mapearla a ConnectionStrings__Default.");
+            Console.WriteLine("❌ ERROR: No se encontró la variable de entorno 'ConnectionStrings__DefaultConnection'.");
+            Console.WriteLine("Asegúrate de pasarla como secret en el workflow o definirla en la sesión.");
             Console.ResetColor();
             return -1;
         }
