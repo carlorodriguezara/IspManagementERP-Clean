@@ -1,14 +1,14 @@
 name: Manual Deploy - Build, Migrate (DbUp) and Deploy
 
 on:
-  workflow_dispatch:    # manual run desde Actions → Run workflow
+  workflow_dispatch:    # ejecución manual desde Actions → Run workflow
     inputs: {}
 
 env:
   DOTNET_VERSION: '7.0.x'
-  WEB_PROJECT_PATH: 'IspManagementERP.Web'           # AJUSTA si tu web project tiene otro nombre o ruta
-  DBUP_PROJECT_PATH: './IspManagementERP.DbUp/IspManagementERP.DbUp.csproj'
-  AZURE_WEBAPP_NAME: 'IspManagementGlobal'           # AJUSTA si tu Web App tiene otro nombre
+  WEB_PROJECT_PATH: './IspManagementERP/Server/IspManagementERP.Server.csproj'   # ruta al .csproj del Server (ajusta si difiere)
+  DBUP_PROJECT_PATH: './IspManagementERP.DbUp/IspManagementERP.DbUp.csproj'     # ruta al proyecto DbUp
+  AZURE_WEBAPP_NAME: 'IspManagementGlobal'                                      # ajusta si el nombre del App Service es distinto
 
 jobs:
   build_migrate_deploy:
@@ -28,7 +28,7 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      - name: Run DbUp migrations (safe, manual)
+      - name: Run DbUp migrations (manual)
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
         run: |
