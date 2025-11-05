@@ -1,0 +1,46 @@
+name: Manual Deploy - Build, Migrate (DbUp) and Deploy
+
+on:
+  workflow_dispatch:    # manual run desde Actions → Run workflow
+    inputs: {}
+
+env:
+  DOTNET_VERSION: '7.0.x'
+  WEB_PROJECT_PATH: 'IspManagementERP.Web'           # AJUSTA si tu web project tiene otro nombre o ruta
+  DBUP_PROJECT_PATH: './IspManagementERP.DbUp/IspManagementERP.DbUp.csproj'
+  AZURE_WEBAPP_NAME: 'IspManagementGlobal'           # AJUSTA si tu Web App tiene otro nombre
+
+jobs:
+  build_migrate_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run DbUp migrations (safe, manual)
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
+        run: |
+          echo "Ejecutando DbUp migrations contra la DB indicada en AZURE_SQL_CONNECTION_STRING..."
+          dotnet run --project "${{ env.DBUP_PROJECT_PATH }}" --configuration Release
+
+      - name: Publish web project
+        run: dotnet publish "${{ env.WEB_PROJECT_PATH }}" -c Release -o publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
