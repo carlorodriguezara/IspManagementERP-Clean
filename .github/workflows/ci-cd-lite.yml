@@ -1,0 +1,91 @@
+name: CI/CD (Lite) - Build and Controlled Deploy
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+env:
+  DOTNET_VERSION: '7.0.x'
+  WEB_PROJECT_PATH: './IspManagementERP/Server/IspManagementERP.Server.csproj'
+  DBUP_PROJECT_PATH: './IspManagementERP.DbUp/IspManagementERP.DbUp.csproj'
+  AZURE_WEBAPP_NAME: 'IspManagementGlobal'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore & Build
+        run: |
+          dotnet restore
+          dotnet build --configuration Release --no-restore
+
+      - name: Publish web project (artifact)
+        run: dotnet publish "${{ env.WEB_PROJECT_PATH }}" -c Release -o ./publish
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-publish
+          path: ./publish
+
+  predeploy_checks:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-publish
+
+      - name: (Opcional) Run DbUp against STAGING/DEV
+        if: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING != '' }}
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING }}
+        run: |
+          echo "Running DbUp against STAGING/DEV (optional)..."
+          dotnet run --project "${{ env.DBUP_PROJECT_PATH }}" --configuration Release
+
+      - name: Smoke test built artifact (placeholder)
+        run: |
+          echo "Add real smoke tests here if you have them."
+
+  deploy_to_prod:
+    needs: predeploy_checks
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://ispmanagementglobal.azurewebsites.net
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-publish
+
+      - name: (Recomendado) Backup PROD DB BEFORE migrations
+        run: |
+          echo "Ensure you performed a backup before approving deploy to PROD."
+
+      - name: Run DbUp migrations on PROD
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
+        run: |
+          echo "Running DbUp against PROD (after approval)..."
+          dotnet run --project "${{ env.DBUP_PROJECT_PATH }}" --configuration Release
+
+      - name: Deploy to Azure (production)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
