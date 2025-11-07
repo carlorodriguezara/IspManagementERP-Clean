@@ -34,9 +34,12 @@ jobs:
         run: |
           dotnet publish "${{ env.WEB_PROJECT_PATH }}" -c Release -o ./publish
 
-      - name: Create zip of published files
+      - name: Publish DbUp (artifact)
         run: |
-          # create zip named web-publish.zip containing the publish folder contents
+          dotnet publish "${{ env.DBUP_PROJECT_PATH }}" -c Release -o ./dbup_publish
+
+      - name: Create zip of published web
+        run: |
           if [ -d "./publish" ]; then
             cd publish
             zip -r ../web-publish.zip . || true
@@ -48,11 +51,30 @@ jobs:
             exit 1
           fi
 
-      - name: Upload artifact (web zip)
+      - name: Create zip of published DbUp
+        run: |
+          if [ -d "./dbup_publish" ]; then
+            cd dbup_publish
+            zip -r ../dbup-publish.zip . || true
+            cd ..
+            ls -la dbup-publish.zip
+          else
+            echo "ERROR: ./dbup_publish no existe en build"
+            ls -la
+            exit 1
+          fi
+
+      - name: Upload web artifact (zip)
         uses: actions/upload-artifact@v4
         with:
           name: web-publish
           path: web-publish.zip
+
+      - name: Upload dbup artifact (zip)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbup-publish
+          path: dbup-publish.zip
 
   predeploy_checks:
     needs: build
@@ -63,44 +85,35 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup .NET (required for running DbUp)
+      - name: Setup .NET (required for optional DbUp checks)
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download publish artifact (for checks)
+      - name: Download web artifact (for checks)
         uses: actions/download-artifact@v4
         with:
           name: web-publish
-          path: ./artifact
+          path: ./artifact_web
 
-      - name: Debug:listar archivos y dotnet info (opcional)
-        run: |
-          echo "PWD: $(pwd)"
-          echo "Listado raiz:"
-          ls -la
-          echo "Contenido ./artifact:"
-          ls -la ./artifact || true
-          echo "Si existe zip, mostrar tamaño:"
-          if [ -f ./artifact/web-publish.zip ]; then
-            echo "web-publish.zip:"
-            ls -lh ./artifact/web-publish.zip
-          fi
-          echo "Buscar csproj DbUp:"
-          find . -maxdepth 6 -type f -name "*.csproj" -print || true
-          dotnet --info
+      - name: Download dbup artifact (for checks)
+        uses: actions/download-artifact@v4
+        with:
+          name: dbup-publish
+          path: ./artifact_dbup
 
       - name: (Opcional) Run DbUp against STAGING/DEV
         if: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING != '' }}
         env:
           ConnectionStrings__DefaultConnection: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING }}
         run: |
-          echo "Running DbUp against STAGING/DEV (optional)..."
-          dotnet run --project "${{ env.DBUP_PROJECT_PATH }}" --configuration Release
-
-      - name: Smoke test built artifact (placeholder)
-        run: |
-          echo "Add real smoke tests here if you have them."
+          DBUP_DLL=$(find ./artifact_dbup -type f -name "IspManagementERP.DbUp.dll" | head -n1)
+          if [ -z "$DBUP_DLL" ]; then
+            echo "DbUp DLL no encontrado en artifact_dbup"
+            exit 1
+          fi
+          echo "Ejecutando DbUp (staging) usando: $DBUP_DLL"
+          dotnet "$DBUP_DLL"
 
   deploy_to_prod:
     needs: predeploy_checks
@@ -117,51 +130,33 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download artifact
+      - name: Download web artifact
         uses: actions/download-artifact@v4
         with:
           name: web-publish
-          path: ./artifact
+          path: ./artifact_web
 
-      - name: Debug:listar artifact antes de deploy (obligatorio para diagnóstico)
-        run: |
-          echo "PWD: $(pwd)"
-          echo "Listando raíz:"
-          ls -la
-          echo "Listando ./artifact (artifact descargado):"
-          ls -la ./artifact || echo "NO existe ./artifact"
-          echo "Contenido recursivo ./artifact:"
-          find ./artifact -maxdepth 3 -type f -print || true
-          echo "Si se desea, listar contenido del zip:"
-          if [ -f ./artifact/web-publish.zip ]; then
-            unzip -l ./artifact/web-publish.zip | head -n 50 || true
-          fi
-
-      - name: Prepare package for azure/webapps-deploy
-        run: |
-          # ensure package exists and is at ./artifact/web-publish.zip
-          if [ -f "./artifact/web-publish.zip" ]; then
-            echo "Artifact zip encontrado: ./artifact/web-publish.zip"
-          else
-            echo "ERROR: ./artifact/web-publish.zip NO existe. List current dir:"
-            ls -la
-            exit 1
-          fi
-
-      - name: (Recomendado) Backup PROD DB BEFORE migrations
-        run: |
-          echo "Ensure you performed a backup before approving deploy to PROD."
+      - name: Download dbup artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dbup-publish
+          path: ./artifact_dbup
 
       - name: Run DbUp migrations on PROD
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
         run: |
-          echo "Running DbUp against PROD (after approval)..."
-          dotnet run --project "${{ env.DBUP_PROJECT_PATH }}" --configuration Release
+          DBUP_DLL=$(find ./artifact_dbup -type f -name "IspManagementERP.DbUp.dll" | head -n1)
+          if [ -z "$DBUP_DLL" ]; then
+            echo "DbUp DLL no encontrado en artifact_dbup"
+            exit 1
+          fi
+          echo "Running DbUp against PROD using: $DBUP_DLL"
+          dotnet "$DBUP_DLL"
 
-      - name: Deploy to Azure (production)
+      - name: Deploy web to Azure (production)
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./artifact/web-publish.zip
+          package: ./artifact_web/web-publish.zip
