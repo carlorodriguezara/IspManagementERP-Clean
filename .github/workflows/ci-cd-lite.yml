@@ -42,17 +42,30 @@ jobs:
   predeploy_checks:
     needs: build
     runs-on: ubuntu-latest
-    # Mapea el secret a una variable de entorno del job para evitar usar `secrets.` en la expresión if
     env:
       AZURE_SQL_CONNECTION_STRING_STAGING: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING }}
+      DBUP_PROJECT_PATH: ${{ env.DBUP_PROJECT_PATH }}
     steps:
-      - name: Download artifact
+      - name: Checkout source
+        uses: actions/checkout@v4
+        
+      - name: Download publish artifact
         uses: actions/download-artifact@v4
         with:
           name: web-publish
 
+      - name: Debug:listar archivos (opcional, borra después)
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Listado raiz:"
+          ls -la
+          echo "Buscar csproj DbUp:"
+          find . -maxdepth 6 -type f -name "*.csproj" -print || true
+          echo "Contenido de publish:"
+          ls -la ./publish || true
+          dotnet --info
+
       - name: (Opcional) Run DbUp against STAGING/DEV
-        # Usa env.* en la condición en lugar de secrets.*
         if: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING != '' }}
         env:
           ConnectionStrings__DefaultConnection: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING }}
