@@ -31,13 +31,28 @@ jobs:
           dotnet build --configuration Release --no-restore
 
       - name: Publish web project (artifact)
-        run: dotnet publish "${{ env.WEB_PROJECT_PATH }}" -c Release -o ./publish
+        run: |
+          dotnet publish "${{ env.WEB_PROJECT_PATH }}" -c Release -o ./publish
 
-      - name: Upload artifact (web)
+      - name: Create zip of published files
+        run: |
+          # create zip named web-publish.zip containing the publish folder contents
+          if [ -d "./publish" ]; then
+            cd publish
+            zip -r ../web-publish.zip . || true
+            cd ..
+            ls -la web-publish.zip
+          else
+            echo "ERROR: ./publish no existe en build"
+            ls -la
+            exit 1
+          fi
+
+      - name: Upload artifact (web zip)
         uses: actions/upload-artifact@v4
         with:
           name: web-publish
-          path: ./publish
+          path: web-publish.zip
 
   predeploy_checks:
     needs: build
@@ -53,20 +68,26 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download publish artifact
+      - name: Download publish artifact (for checks)
         uses: actions/download-artifact@v4
         with:
           name: web-publish
+          path: ./artifact
 
-      - name: Debug:listar archivos y dotnet info (opcional)
+      - name: Debug: listar archivos y dotnet info (opcional)
         run: |
           echo "PWD: $(pwd)"
           echo "Listado raiz:"
           ls -la
+          echo "Contenido ./artifact:"
+          ls -la ./artifact || true
+          echo "Si existe zip, mostrar tamaño:"
+          if [ -f ./artifact/web-publish.zip ]; then
+            echo "web-publish.zip:"
+            ls -lh ./artifact/web-publish.zip
+          fi
           echo "Buscar csproj DbUp:"
           find . -maxdepth 6 -type f -name "*.csproj" -print || true
-          echo "Contenido de web-publish (artifact descargado):"
-          ls -la ./web-publish || true
           dotnet --info
 
       - name: (Opcional) Run DbUp against STAGING/DEV
@@ -100,26 +121,29 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: web-publish
+          path: ./artifact
 
-      - name: Debug:listar artifact antes de deploy (opcional, para diagnóstico)
+      - name: Debug: listar artifact antes de deploy (obligatorio para diagnóstico)
         run: |
           echo "PWD: $(pwd)"
           echo "Listando raíz:"
           ls -la
-          echo "Listando ./web-publish (artifact descargado):"
-          ls -la ./web-publish || echo "NO existe ./web-publish"
-          echo "Contenido recursivo ./web-publish:"
-          find ./web-publish -maxdepth 3 -type f -print || true
+          echo "Listando ./artifact (artifact descargado):"
+          ls -la ./artifact || echo "NO existe ./artifact"
+          echo "Contenido recursivo ./artifact:"
+          find ./artifact -maxdepth 3 -type f -print || true
+          echo "Si se desea, listar contenido del zip:"
+          if [ -f ./artifact/web-publish.zip ]; then
+            unzip -l ./artifact/web-publish.zip | head -n 50 || true
+          fi
 
       - name: Prepare package for azure/webapps-deploy
         run: |
-          if [ -d "./web-publish" ]; then
-            mkdir -p ./publish
-            cp -r ./web-publish/* ./publish/ || true
-            echo "Contenido ./publish:"
-            ls -la ./publish || true
+          # ensure package exists and is at ./artifact/web-publish.zip
+          if [ -f "./artifact/web-publish.zip" ]; then
+            echo "Artifact zip encontrado: ./artifact/web-publish.zip"
           else
-            echo "web-publish no existe, abortando para evitar deploy inválido"
+            echo "ERROR: ./artifact/web-publish.zip NO existe. List current dir:"
             ls -la
             exit 1
           fi
@@ -140,4 +164,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./publish
+          package: ./artifact/web-publish.zip
