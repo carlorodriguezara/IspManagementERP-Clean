@@ -65,8 +65,8 @@ jobs:
           ls -la
           echo "Buscar csproj DbUp:"
           find . -maxdepth 6 -type f -name "*.csproj" -print || true
-          echo "Contenido de publish:"
-          ls -la ./publish || true
+          echo "Contenido de web-publish (artifact descargado):"
+          ls -la ./web-publish || true
           dotnet --info
 
       - name: (Opcional) Run DbUp against STAGING/DEV
@@ -101,6 +101,16 @@ jobs:
         with:
           name: web-publish
 
+      - name: Debug:listar artifact antes de deploy (opcional)
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Contenido ./web-publish:"
+          ls -la ./web-publish || true
+          echo "Si deseas usar ./publish en lugar de ./web-publish, crea la carpeta moviendo archivos:"
+          if [ -d ./web-publish ]; then mkdir -p ./publish && cp -r ./web-publish/* ./publish/ || true; fi
+          echo "Contenido ./publish (si existe):"
+          ls -la ./publish || true
+
       - name: (Recomendado) Backup PROD DB BEFORE migrations
         run: |
           echo "Ensure you performed a backup before approving deploy to PROD."
@@ -117,4 +127,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./publish
+          package: ./web-publish
