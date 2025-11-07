@@ -10,7 +10,7 @@ on:
 env:
   DOTNET_VERSION: '7.0.x'
   WEB_PROJECT_PATH: './IspManagementERP/Server/IspManagementERP.Server.csproj'
-  DBUP_PROJECT_PATH: './IspManagementERP.DbUp/IspManagementERP.DbUp.csproj'  # definido una sola vez aquí
+  DBUP_PROJECT_PATH: './IspManagementERP.DbUp/IspManagementERP.DbUp.csproj'
   AZURE_WEBAPP_NAME: 'IspManagementGlobal'
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET (build)
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -44,17 +44,21 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AZURE_SQL_CONNECTION_STRING_STAGING: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING }}
-      # NO volver a referir env.DBUP_PROJECT_PATH aquí con una expresión; se usará la variable definida arriba
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+
+      - name: Setup .NET (required for running DbUp)
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Download publish artifact
         uses: actions/download-artifact@v4
         with:
           name: web-publish
 
-      - name: Debug:listar archivos (opcional, borra después)
+      - name: Debug:listar archivos y dotnet info (opcional)
         run: |
           echo "PWD: $(pwd)"
           echo "Listado raiz:"
@@ -84,6 +88,11 @@ jobs:
       name: production
       url: https://ispmanagementglobal.azurewebsites.net
     steps:
+      - name: Setup .NET (required for running DbUp in deploy job)
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
