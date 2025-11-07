@@ -42,6 +42,9 @@ jobs:
   predeploy_checks:
     needs: build
     runs-on: ubuntu-latest
+    # Mapea el secret a una variable de entorno del job para evitar usar `secrets.` en la expresión if
+    env:
+      AZURE_SQL_CONNECTION_STRING_STAGING: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -49,9 +52,10 @@ jobs:
           name: web-publish
 
       - name: (Opcional) Run DbUp against STAGING/DEV
-        if: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING != '' }}
+        # Usa env.* en la condición en lugar de secrets.*
+        if: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING != '' }}
         env:
-          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING }}
+          ConnectionStrings__DefaultConnection: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING }}
         run: |
           echo "Running DbUp against STAGING/DEV (optional)..."
           dotnet run --project "${{ env.DBUP_PROJECT_PATH }}" --configuration Release
