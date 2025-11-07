@@ -17,7 +17,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Setup .NET (build)
@@ -33,7 +33,7 @@ jobs:
       - name: Publish web project (artifact)
         run: dotnet publish "${{ env.WEB_PROJECT_PATH }}" -c Release -o ./publish
 
-      - name: Upload artifact
+      - name: Upload artifact (web)
         uses: actions/upload-artifact@v4
         with:
           name: web-publish
@@ -101,15 +101,28 @@ jobs:
         with:
           name: web-publish
 
-      - name: Debug:listar artifact antes de deploy (opcional)
+      - name: Debug:listar artifact antes de deploy (opcional, para diagnóstico)
         run: |
           echo "PWD: $(pwd)"
-          echo "Contenido ./web-publish:"
-          ls -la ./web-publish || true
-          echo "Si deseas usar ./publish en lugar de ./web-publish, crea la carpeta moviendo archivos:"
-          if [ -d ./web-publish ]; then mkdir -p ./publish && cp -r ./web-publish/* ./publish/ || true; fi
-          echo "Contenido ./publish (si existe):"
-          ls -la ./publish || true
+          echo "Listando raíz:"
+          ls -la
+          echo "Listando ./web-publish (artifact descargado):"
+          ls -la ./web-publish || echo "NO existe ./web-publish"
+          echo "Contenido recursivo ./web-publish:"
+          find ./web-publish -maxdepth 3 -type f -print || true
+
+      - name: Prepare package for azure/webapps-deploy
+        run: |
+          if [ -d "./web-publish" ]; then
+            mkdir -p ./publish
+            cp -r ./web-publish/* ./publish/ || true
+            echo "Contenido ./publish:"
+            ls -la ./publish || true
+          else
+            echo "web-publish no existe, abortando para evitar deploy inválido"
+            ls -la
+            exit 1
+          fi
 
       - name: (Recomendado) Backup PROD DB BEFORE migrations
         run: |
@@ -127,4 +140,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./web-publish
+          package: ./publish
