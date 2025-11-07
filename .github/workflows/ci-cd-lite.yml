@@ -74,7 +74,7 @@ jobs:
           name: web-publish
           path: ./artifact
 
-      - name: Debug: listar archivos y dotnet info (opcional)
+      - name: Debug:listar archivos y dotnet info (opcional)
         run: |
           echo "PWD: $(pwd)"
           echo "Listado raiz:"
@@ -123,7 +123,7 @@ jobs:
           name: web-publish
           path: ./artifact
 
-      - name: Debug: listar artifact antes de deploy (obligatorio para diagnóstico)
+      - name: Debug:listar artifact antes de deploy (obligatorio para diagnóstico)
         run: |
           echo "PWD: $(pwd)"
           echo "Listando raíz:"
