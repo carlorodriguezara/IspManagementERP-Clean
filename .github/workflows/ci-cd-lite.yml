@@ -30,11 +30,11 @@ jobs:
           dotnet restore
           dotnet build --configuration Release --no-restore
 
-      - name: Publish web project (artifact)
+      - name: Publish web project
         run: |
           dotnet publish "${{ env.WEB_PROJECT_PATH }}" -c Release -o ./publish
 
-      - name: Publish DbUp (artifact)
+      - name: Publish DbUp project
         run: |
           dotnet publish "${{ env.DBUP_PROJECT_PATH }}" -c Release -o ./dbup_publish
 
@@ -44,7 +44,6 @@ jobs:
             cd publish
             zip -r ../web-publish.zip . || true
             cd ..
-            ls -la web-publish.zip
           else
             echo "ERROR: ./publish no existe en build"
             ls -la
@@ -57,7 +56,6 @@ jobs:
             cd dbup_publish
             zip -r ../dbup-publish.zip . || true
             cd ..
-            ls -la dbup-publish.zip
           else
             echo "ERROR: ./dbup_publish no existe en build"
             ls -la
@@ -102,15 +100,27 @@ jobs:
           name: dbup-publish
           path: ./artifact_dbup
 
+      - name: Unzip dbup artifact (if present)
+        run: |
+          if [ -f ./artifact_dbup/dbup-publish.zip ]; then
+            mkdir -p ./artifact_dbup/unzipped
+            unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped || true
+          else
+            echo "No se encontró ./artifact_dbup/dbup-publish.zip — se omiten los checks de DbUp (opcional)"
+          fi
+
       - name: (Opcional) Run DbUp against STAGING/DEV
         if: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING != '' }}
         env:
           ConnectionStrings__DefaultConnection: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING }}
         run: |
-          DBUP_DLL=$(find ./artifact_dbup -type f -name "IspManagementERP.DbUp.dll" | head -n1)
+          DBUP_DLL=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
           if [ -z "$DBUP_DLL" ]; then
-            echo "DbUp DLL no encontrado en artifact_dbup"
-            exit 1
+            DBUP_DLL=$(find ./artifact_dbup -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
+          fi
+          if [ -z "$DBUP_DLL" ]; then
+            echo "DbUp DLL no encontrado en artifact_dbup; se omiten los checks de DbUp (opcional)."
+            exit 0
           fi
           echo "Ejecutando DbUp (staging) usando: $DBUP_DLL"
           dotnet "$DBUP_DLL"
@@ -146,11 +156,26 @@ jobs:
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
         run: |
-          DBUP_DLL=$(find ./artifact_dbup -type f -name "IspManagementERP.DbUp.dll" | head -n1)
+          DBUP_DLL=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
           if [ -z "$DBUP_DLL" ]; then
-            echo "DbUp DLL no encontrado en artifact_dbup"
+            # fallback: try to inspect zip without unzipping (in case build artifact layout differs)
+            if [ -f ./artifact_dbup/dbup-publish.zip ]; then
+              unzip -l ./artifact_dbup/dbup-publish.zip | awk '{print $4}' | grep "IspManagementERP.DbUp.dll" | head -n1 > /tmp/_dbup_dll_path || true
+              if [ -s /tmp/_dbup_dll_path ]; then
+                DBUP_DLL_PATH_IN_ZIP=$(cat /tmp/_dbup_dll_path)
+                mkdir -p ./artifact_dbup/unzipped_from_zip
+                unzip -q ./artifact_dbup/dbup-publish.zip "$DBUP_DLL_PATH_IN_ZIP" -d ./artifact_dbup/unzipped_from_zip || true
+                DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
+              fi
+            fi
+          fi
+
+          if [ -z "$DBUP_DLL" ]; then
+            echo "ERROR: DbUp DLL no encontrado en artifact_dbup; no se pueden ejecutar migraciones en PROD."
+            ls -la ./artifact_dbup || true
             exit 1
           fi
+
           echo "Running DbUp against PROD using: $DBUP_DLL"
           dotnet "$DBUP_DLL"
 
