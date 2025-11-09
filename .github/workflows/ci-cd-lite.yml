@@ -12,6 +12,7 @@ env:
   WEB_PROJECT_PATH: './IspManagementERP/Server/IspManagementERP.Server.csproj'
   DBUP_PROJECT_PATH: './IspManagementERP.DbUp/IspManagementERP.DbUp.csproj'
   AZURE_WEBAPP_NAME: 'IspManagementGlobal'
+  DBUP_RUNTIME: 'linux-x64'    # runtime identifier for self-contained publish
 
 jobs:
   build:
@@ -34,9 +35,10 @@ jobs:
         run: |
           dotnet publish "${{ env.WEB_PROJECT_PATH }}" -c Release -o ./publish
 
-      - name: Publish DbUp project
+      - name: Publish DbUp project (self-contained linux-x64)
         run: |
-          dotnet publish "${{ env.DBUP_PROJECT_PATH }}" -c Release -o ./dbup_publish
+          # Publish self-contained executable (includes runtime) so we can run directly on runner
+          dotnet publish "${{ env.DBUP_PROJECT_PATH }}" -c Release -r $DBUP_RUNTIME --self-contained true -p:PublishSingleFile=false -o ./dbup_publish
 
       - name: Create zip of published web
         run: |
@@ -83,16 +85,10 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup .NET (required for optional DbUp checks)
+      - name: Setup .NET (optional for diagnostics)
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Download web artifact (for checks)
-        uses: actions/download-artifact@v4
-        with:
-          name: web-publish
-          path: ./artifact_web
 
       - name: Download dbup artifact (for checks)
         uses: actions/download-artifact@v4
@@ -111,36 +107,44 @@ jobs:
             echo "No se encontró ./artifact_dbup/dbup-publish.zip — se omiten los checks de DbUp (opcional)"
           fi
 
-      - name: (Opcional) Run DbUp against STAGING/DEV
+      - name: (Opcional) Run DbUp against STAGING/DEV (self-contained)
         if: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING != '' }}
         env:
-          ConnectionStrings__DefaultConnection: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING }}
+          AZURE_SQL_CONNECTION_STRING: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING }}
         run: |
           set -euo pipefail
-          echo "Optional: run DbUp against STAGING using the published artifact..."
+          echo "Optional: run DbUp against STAGING using published self-contained artifact..."
           if [ -f ./artifact_dbup/dbup-publish.zip ]; then
             rm -rf ./artifact_dbup/unzipped || true
             mkdir -p ./artifact_dbup/unzipped
             unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped || true
             echo "Listing unzipped files (first 200 entries):"
             find ./artifact_dbup/unzipped -type f | sed -n '1,200p'
-            DBUP_DLL=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
           else
-            echo "No dbup-publish.zip found in artifact_dbup - skipping optional DbUp staging run."
+            echo "No dbup-publish.zip found - skipping optional staging run."
             exit 0
           fi
 
-          if [ -z "$DBUP_DLL" ]; then
-            echo "ERROR: IspManagementERP.DbUp.dll not found inside unzipped artifact. See files above."
-            ls -la ./artifact_dbup/unzipped || true
+          # Find native executable (self-contained publish). Name may be 'IspManagementERP.DbUp' (no extension)
+          EXE=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp" -perm /111 -print -quit || true)
+          if [ -z "$EXE" ]; then
+            # fallback: try dll if it exists and run with dotnet
+            EXE_DLL=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
+            if [ -n "$EXE_DLL" ]; then
+              echo "Found DLL fallback: $EXE_DLL"
+              echo "Running with dotnet..."
+              dotnet "$EXE_DLL" "$AZURE_SQL_CONNECTION_STRING"
+              exit 0
+            fi
+            echo "ERROR: No executable or dll found inside unzipped artifact for staging run."
             exit 1
           fi
 
-          echo "Found DbUp DLL: $DBUP_DLL"
-          DBUP_DIR=$(dirname "$DBUP_DLL")
-          echo "Running dotnet <dll> from directory: $DBUP_DIR"
-          ls -la "$DBUP_DIR" || true
-          dotnet "$DBUP_DLL"
+          echo "Found self-contained DbUp executable: $EXE"
+          chmod +x "$EXE" || true
+          echo "Running: $EXE"
+          # pass connection string via env var expected by your app if needed, otherwise app can read from secrets configured in environment
+          AZURE_SQL_CONNECTION_STRING="$AZURE_SQL_CONNECTION_STRING" "$EXE"
 
   deploy_to_prod:
     needs: predeploy_checks
@@ -152,16 +156,10 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup .NET (required for running DbUp in deploy job)
+      - name: Setup .NET (for fallback/diagnostics)
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Download web artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: web-publish
-          path: ./artifact_web
 
       - name: Download dbup artifact
         uses: actions/download-artifact@v4
@@ -182,17 +180,16 @@ jobs:
             echo "dbup-publish.zip NOT found"
           fi
 
-      - name: Run DbUp migrations on PROD (unzip all & run)
+      - name: Run DbUp migrations on PROD (self-contained)
         env:
-          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
+          AZURE_SQL_CONNECTION_STRING: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
         run: |
           set -euo pipefail
-          echo "Preparing to run DbUp on PROD..."
+          echo "Preparing to run self-contained DbUp on PROD..."
           rm -rf ./artifact_dbup/unzipped_from_zip || true
           mkdir -p ./artifact_dbup/unzipped_from_zip
 
           if [ -f ./artifact_dbup/dbup-publish.zip ]; then
-            echo "Unzipping entire dbup-publish.zip to ./artifact_dbup/unzipped_from_zip ..."
             unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped_from_zip || true
           else
             echo "ERROR: ./artifact_dbup/dbup-publish.zip not found. Listing artifact_dbup:"
@@ -204,56 +201,32 @@ jobs:
           find ./artifact_dbup/unzipped_from_zip -type f | sed -n '1,300p' || true
           echo "---- end list ----"
 
-          # Prefer a folder that contains runtimeconfig.json (framework-dependent publish)
-          RUNTIME_FILE=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.runtimeconfig.json" -print -quit || true)
+          # Try to find the self-contained native executable first
+          EXE=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp" -perm /111 -print -quit || true)
 
-          if [ -n "$RUNTIME_FILE" ]; then
-            DBUP_DIR=$(dirname "$RUNTIME_FILE")
-            DBUP_DLL=$(find "$DBUP_DIR" -maxdepth 1 -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
-            echo "Found runtimeconfig.json at: $RUNTIME_FILE"
-          else
-            echo "No runtimeconfig.json found next to any files. Searching for any IspManagementERP.DbUp.dll..."
-            DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
-            if [ -n "$DBUP_DLL" ]; then
-              DBUP_DIR=$(dirname "$DBUP_DLL")
-              echo "Found DbUp DLL at: $DBUP_DLL but no runtimeconfig.json next to it."
-            fi
+          if [ -n "$EXE" ]; then
+            echo "Found self-contained executable: $EXE"
+            chmod +x "$EXE" || true
+            echo "Running native executable..."
+            AZURE_SQL_CONNECTION_STRING="${AZURE_SQL_CONNECTION_STRING}" "$EXE"
+            exit 0
           fi
 
-          if [ -z "${DBUP_DLL:-}" ]; then
-            echo "ERROR: IspManagementERP.DbUp.dll not found inside extracted artifact."
-            echo "Contents of artifact_dbup/unzipped_from_zip (full):"
-            find ./artifact_dbup/unzipped_from_zip -type f -print || true
-            exit 1
+          # Fallback: try to find the DLL and run with dotnet
+          DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
+          if [ -n "$DBUP_DLL" ]; then
+            echo "Found fallback DLL: $DBUP_DLL"
+            DBUP_DIR=$(dirname "$DBUP_DLL")
+            echo "Running with dotnet from directory: $DBUP_DIR"
+            pushd "$DBUP_DIR" > /dev/null || true
+            echo "dotnet \"${DBUP_DLL##*/}\""
+            dotnet "${DBUP_DLL##*/}" "${AZURE_SQL_CONNECTION_STRING}" || true
+            popd > /dev/null || true
+            exit 0
           fi
 
-          echo "Using DBUP_DLL = $DBUP_DLL"
-          echo "Listing directory $DBUP_DIR for inspection:"
-          ls -la "$DBUP_DIR" || true
-
-          # Show the main runtime files if present
-          echo "Looking for runtime files next to dll:"
-          for f in "$DBUP_DIR"/IspManagementERP.DbUp.*; do
-            [ -e "$f" ] && echo "  $f"
-          done || true
-
-          # Final sanity: ensure the connection string env var is defined
-          echo "ConnectionStrings__DefaultConnection present? ${ConnectionStrings__DefaultConnection:+yes}" || true
-
-          echo "Attempting to run the DbUp DLL with dotnet from $DBUP_DIR"
-          pushd "$DBUP_DIR" > /dev/null || true
-          echo "pwd: $(pwd)"
-          echo "ls -la"
-          ls -la
-          echo "Running: dotnet \"${DBUP_DLL##*/}\""
-          dotnet "${DBUP_DLL##*/}" || true
-          popd > /dev/null || true
-
-          # If the above failed, fallback to running dotnet run from source (less preferred)
-          if [ $? -ne 0 ]; then
-            echo "dotnet <dll> returned non-zero exit code — attempting fallback dotnet run (source) as diagnostic"
-            dotnet run --project "${{ env.DBUP_PROJECT_PATH }}" --configuration Release -- "${ConnectionStrings__DefaultConnection:-}" || true
-          fi
+          echo "ERROR: No DbUp executable or DLL found in artifact. See listing above."
+          exit 1
 
       - name: Deploy web to Azure (production)
         uses: azure/webapps-deploy@v2
