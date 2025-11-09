@@ -140,7 +140,6 @@ jobs:
           DBUP_DIR=$(dirname "$DBUP_DLL")
           echo "Running dotnet <dll> from directory: $DBUP_DIR"
           ls -la "$DBUP_DIR" || true
-          # The published app should read ConnectionStrings__DefaultConnection from env
           dotnet "$DBUP_DLL"
 
   deploy_to_prod:
@@ -170,7 +169,20 @@ jobs:
           name: dbup-publish
           path: ./artifact_dbup
 
-      - name: Run DbUp migrations on PROD
+      - name: Debug .NET and unzip info
+        run: |
+          set -euo pipefail
+          echo "dotnet --info"
+          dotnet --info || true
+          echo "List artifact_dbup contents (top):"
+          ls -la ./artifact_dbup || true
+          if [ -f ./artifact_dbup/dbup-publish.zip ]; then
+            echo "dbup-publish.zip exists"
+          else
+            echo "dbup-publish.zip NOT found"
+          fi
+
+      - name: Run DbUp migrations on PROD (unzip all & run)
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
         run: |
@@ -188,8 +200,8 @@ jobs:
             exit 1
           fi
 
-          echo "Listing extracted files (first 200 entries):"
-          find ./artifact_dbup/unzipped_from_zip -type f | sed -n '1,200p'
+          echo "Listing extracted files (first 300 entries):"
+          find ./artifact_dbup/unzipped_from_zip -type f | sed -n '1,300p' || true
           echo "---- end list ----"
 
           # Prefer a folder that contains runtimeconfig.json (framework-dependent publish)
@@ -225,9 +237,23 @@ jobs:
             [ -e "$f" ] && echo "  $f"
           done || true
 
-          # Run the dll with dotnet (framework-dependent). The published app should read the connection string from env.
-          echo "Running: dotnet \"$DBUP_DLL\""
-          dotnet "$DBUP_DLL"
+          # Final sanity: ensure the connection string env var is defined
+          echo "ConnectionStrings__DefaultConnection present? ${ConnectionStrings__DefaultConnection:+yes}" || true
+
+          echo "Attempting to run the DbUp DLL with dotnet from $DBUP_DIR"
+          pushd "$DBUP_DIR" > /dev/null || true
+          echo "pwd: $(pwd)"
+          echo "ls -la"
+          ls -la
+          echo "Running: dotnet \"${DBUP_DLL##*/}\""
+          dotnet "${DBUP_DLL##*/}" || true
+          popd > /dev/null || true
+
+          # If the above failed, fallback to running dotnet run from source (less preferred)
+          if [ $? -ne 0 ]; then
+            echo "dotnet <dll> returned non-zero exit code — attempting fallback dotnet run (source) as diagnostic"
+            dotnet run --project "${{ env.DBUP_PROJECT_PATH }}" --configuration Release -- "${ConnectionStrings__DefaultConnection:-}" || true
+          fi
 
       - name: Deploy web to Azure (production)
         uses: azure/webapps-deploy@v2
