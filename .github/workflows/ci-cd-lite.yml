@@ -103,6 +103,7 @@ jobs:
       - name: Unzip dbup artifact (if present)
         run: |
           if [ -f ./artifact_dbup/dbup-publish.zip ]; then
+            rm -rf ./artifact_dbup/unzipped || true
             mkdir -p ./artifact_dbup/unzipped
             unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped || true
           else
@@ -114,15 +115,31 @@ jobs:
         env:
           ConnectionStrings__DefaultConnection: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING }}
         run: |
-          DBUP_DLL=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
-          if [ -z "$DBUP_DLL" ]; then
-            DBUP_DLL=$(find ./artifact_dbup -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
-          fi
-          if [ -z "$DBUP_DLL" ]; then
-            echo "DbUp DLL no encontrado en artifact_dbup; se omiten los checks de DbUp (opcional)."
+          set -euo pipefail
+          echo "Optional: run DbUp against STAGING using the published artifact..."
+          if [ -f ./artifact_dbup/dbup-publish.zip ]; then
+            rm -rf ./artifact_dbup/unzipped || true
+            mkdir -p ./artifact_dbup/unzipped
+            unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped || true
+            echo "Listing unzipped files (first 200 entries):"
+            find ./artifact_dbup/unzipped -type f | sed -n '1,200p'
+            DBUP_DLL=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
+          else
+            echo "No dbup-publish.zip found in artifact_dbup - skipping optional DbUp staging run."
             exit 0
           fi
-          echo "Ejecutando DbUp (staging) usando: $DBUP_DLL"
+
+          if [ -z "$DBUP_DLL" ]; then
+            echo "ERROR: IspManagementERP.DbUp.dll not found inside unzipped artifact. See files above."
+            ls -la ./artifact_dbup/unzipped || true
+            exit 1
+          fi
+
+          echo "Found DbUp DLL: $DBUP_DLL"
+          DBUP_DIR=$(dirname "$DBUP_DLL")
+          echo "Running dotnet <dll> from directory: $DBUP_DIR"
+          ls -la "$DBUP_DIR" || true
+          # The published app should read ConnectionStrings__DefaultConnection from env
           dotnet "$DBUP_DLL"
 
   deploy_to_prod:
@@ -156,27 +173,36 @@ jobs:
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
         run: |
-          DBUP_DLL=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
-          if [ -z "$DBUP_DLL" ]; then
-            # fallback: try to inspect zip without unzipping (in case build artifact layout differs)
-            if [ -f ./artifact_dbup/dbup-publish.zip ]; then
-              unzip -l ./artifact_dbup/dbup-publish.zip | awk '{print $4}' | grep "IspManagementERP.DbUp.dll" | head -n1 > /tmp/_dbup_dll_path || true
-              if [ -s /tmp/_dbup_dll_path ]; then
-                DBUP_DLL_PATH_IN_ZIP=$(cat /tmp/_dbup_dll_path)
-                mkdir -p ./artifact_dbup/unzipped_from_zip
-                unzip -q ./artifact_dbup/dbup-publish.zip "$DBUP_DLL_PATH_IN_ZIP" -d ./artifact_dbup/unzipped_from_zip || true
-                DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
-              fi
-            fi
-          fi
+          set -euo pipefail
+          echo "Preparing to run DbUp on PROD..."
+          rm -rf ./artifact_dbup/unzipped_from_zip || true
+          mkdir -p ./artifact_dbup/unzipped_from_zip
 
-          if [ -z "$DBUP_DLL" ]; then
-            echo "ERROR: DbUp DLL no encontrado en artifact_dbup; no se pueden ejecutar migraciones en PROD."
+          if [ -f ./artifact_dbup/dbup-publish.zip ]; then
+            echo "Unzipping entire dbup-publish.zip to ./artifact_dbup/unzipped_from_zip ..."
+            unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped_from_zip || true
+          else
+            echo "ERROR: ./artifact_dbup/dbup-publish.zip not found. Listing artifact_dbup:"
             ls -la ./artifact_dbup || true
             exit 1
           fi
 
-          echo "Running DbUp against PROD using: $DBUP_DLL"
+          echo "Listing extracted files (first 200 entries):"
+          find ./artifact_dbup/unzipped_from_zip -type f | sed -n '1,200p'
+
+          DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
+
+          if [ -z "$DBUP_DLL" ]; then
+            echo "ERROR: IspManagementERP.DbUp.dll not found inside extracted artifact."
+            exit 1
+          fi
+
+          echo "Found DbUp DLL at: $DBUP_DLL"
+          DBUP_DIR=$(dirname "$DBUP_DLL")
+          echo "Running dotnet from: $DBUP_DIR (so runtimeconfig.json and deps are present)"
+          ls -la "$DBUP_DIR" || true
+
+          # Run the dll with dotnet (framework-dependent). The published app should read the connection string from env.
           dotnet "$DBUP_DLL"
 
       - name: Deploy web to Azure (production)
