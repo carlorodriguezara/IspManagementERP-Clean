@@ -79,7 +79,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     env:
-      # keep staging secret name here; we will map it into ConnectionStrings__DefaultConnection below
       AZURE_SQL_CONNECTION_STRING_STAGING: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING }}
     steps:
       - name: Checkout source
@@ -110,7 +109,6 @@ jobs:
       - name: (Opcional) Run DbUp against STAGING/DEV (self-contained)
         if: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING != '' }}
         env:
-          # map secret to the env var your app expects
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING }}
         run: |
           set -euo pipefail
@@ -161,6 +159,12 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Download web artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-publish
+          path: ./artifact_web
+
       - name: Download dbup artifact
         uses: actions/download-artifact@v4
         with:
@@ -182,7 +186,6 @@ jobs:
 
       - name: Run DbUp migrations on PROD (self-contained)
         env:
-          # map secret to the env var your app expects in production
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
         run: |
           set -euo pipefail
@@ -202,16 +205,18 @@ jobs:
           find ./artifact_dbup/unzipped_from_zip -type f | sed -n '1,300p' || true
           echo "---- end list ----"
 
+          # Try to find the self-contained native executable first
           EXE=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp" -perm /111 -print -quit || true)
 
           if [ -n "$EXE" ]; then
             echo "Found self-contained executable: $EXE"
             chmod +x "$EXE" || true
             echo "Running native executable..."
-            "$EXE"
+            ConnectionStrings__DefaultConnection="${ConnectionStrings__DefaultConnection}" "$EXE"
             exit 0
           fi
 
+          # Fallback: try to find the DLL and run with dotnet
           DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
           if [ -n "$DBUP_DLL" ]; then
             echo "Found fallback DLL: $DBUP_DLL"
@@ -227,9 +232,24 @@ jobs:
           echo "ERROR: No DbUp executable or DLL found in artifact. See listing above."
           exit 1
 
+      - name: Find and set WEB package path
+        run: |
+          set -euo pipefail
+          echo "Listing ./artifact_web:"
+          ls -la ./artifact_web || true
+          CANDIDATE=$(find ./artifact_web -type f -iname "web-publish*.zip" -print -quit || true)
+          if [ -z "$CANDIDATE" ]; then
+            echo "ERROR: No web package found in ./artifact_web"
+            echo "Contents:"
+            find ./artifact_web -type f -print || true
+            exit 1
+          fi
+          echo "WEB_PACKAGE_PATH=$CANDIDATE" >> $GITHUB_ENV
+          echo "Found web package: $CANDIDATE"
+
       - name: Deploy web to Azure (production)
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./artifact_web/web-publish.zip
+          package: ${{ env.WEB_PACKAGE_PATH }}
