@@ -37,7 +37,6 @@ jobs:
 
       - name: Publish DbUp project (self-contained linux-x64)
         run: |
-          # Publish self-contained executable (includes runtime) so we can run directly on runner
           dotnet publish "${{ env.DBUP_PROJECT_PATH }}" -c Release -r $DBUP_RUNTIME --self-contained true -p:PublishSingleFile=false -o ./dbup_publish
 
       - name: Create zip of published web
@@ -80,6 +79,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     env:
+      # keep staging secret name here; we will map it into ConnectionStrings__DefaultConnection below
       AZURE_SQL_CONNECTION_STRING_STAGING: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING }}
     steps:
       - name: Checkout source
@@ -110,7 +110,8 @@ jobs:
       - name: (Opcional) Run DbUp against STAGING/DEV (self-contained)
         if: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING != '' }}
         env:
-          AZURE_SQL_CONNECTION_STRING: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING }}
+          # map secret to the env var your app expects
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING }}
         run: |
           set -euo pipefail
           echo "Optional: run DbUp against STAGING using published self-contained artifact..."
@@ -128,12 +129,11 @@ jobs:
           # Find native executable (self-contained publish). Name may be 'IspManagementERP.DbUp' (no extension)
           EXE=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp" -perm /111 -print -quit || true)
           if [ -z "$EXE" ]; then
-            # fallback: try dll if it exists and run with dotnet
             EXE_DLL=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
             if [ -n "$EXE_DLL" ]; then
               echo "Found DLL fallback: $EXE_DLL"
               echo "Running with dotnet..."
-              dotnet "$EXE_DLL" "$AZURE_SQL_CONNECTION_STRING"
+              dotnet "$EXE_DLL"
               exit 0
             fi
             echo "ERROR: No executable or dll found inside unzipped artifact for staging run."
@@ -143,8 +143,8 @@ jobs:
           echo "Found self-contained DbUp executable: $EXE"
           chmod +x "$EXE" || true
           echo "Running: $EXE"
-          # pass connection string via env var expected by your app if needed, otherwise app can read from secrets configured in environment
-          AZURE_SQL_CONNECTION_STRING="$AZURE_SQL_CONNECTION_STRING" "$EXE"
+          # The app will read ConnectionStrings__DefaultConnection from env
+          "$EXE"
 
   deploy_to_prod:
     needs: predeploy_checks
@@ -182,7 +182,8 @@ jobs:
 
       - name: Run DbUp migrations on PROD (self-contained)
         env:
-          AZURE_SQL_CONNECTION_STRING: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
+          # map secret to the env var your app expects in production
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
         run: |
           set -euo pipefail
           echo "Preparing to run self-contained DbUp on PROD..."
@@ -201,18 +202,16 @@ jobs:
           find ./artifact_dbup/unzipped_from_zip -type f | sed -n '1,300p' || true
           echo "---- end list ----"
 
-          # Try to find the self-contained native executable first
           EXE=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp" -perm /111 -print -quit || true)
 
           if [ -n "$EXE" ]; then
             echo "Found self-contained executable: $EXE"
             chmod +x "$EXE" || true
             echo "Running native executable..."
-            AZURE_SQL_CONNECTION_STRING="${AZURE_SQL_CONNECTION_STRING}" "$EXE"
+            "$EXE"
             exit 0
           fi
 
-          # Fallback: try to find the DLL and run with dotnet
           DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
           if [ -n "$DBUP_DLL" ]; then
             echo "Found fallback DLL: $DBUP_DLL"
@@ -220,7 +219,7 @@ jobs:
             echo "Running with dotnet from directory: $DBUP_DIR"
             pushd "$DBUP_DIR" > /dev/null || true
             echo "dotnet \"${DBUP_DLL##*/}\""
-            dotnet "${DBUP_DLL##*/}" "${AZURE_SQL_CONNECTION_STRING}" || true
+            dotnet "${DBUP_DLL##*/}" || true
             popd > /dev/null || true
             exit 0
           fi
