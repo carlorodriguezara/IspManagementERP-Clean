@@ -106,6 +106,7 @@ jobs:
             rm -rf ./artifact_dbup/unzipped || true
             mkdir -p ./artifact_dbup/unzipped
             unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped || true
+            echo "Unzip completed for checks."
           else
             echo "No se encontró ./artifact_dbup/dbup-publish.zip — se omiten los checks de DbUp (opcional)"
           fi
@@ -189,20 +190,43 @@ jobs:
 
           echo "Listing extracted files (first 200 entries):"
           find ./artifact_dbup/unzipped_from_zip -type f | sed -n '1,200p'
+          echo "---- end list ----"
 
-          DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
+          # Prefer a folder that contains runtimeconfig.json (framework-dependent publish)
+          RUNTIME_FILE=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.runtimeconfig.json" -print -quit || true)
 
-          if [ -z "$DBUP_DLL" ]; then
+          if [ -n "$RUNTIME_FILE" ]; then
+            DBUP_DIR=$(dirname "$RUNTIME_FILE")
+            DBUP_DLL=$(find "$DBUP_DIR" -maxdepth 1 -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
+            echo "Found runtimeconfig.json at: $RUNTIME_FILE"
+          else
+            echo "No runtimeconfig.json found next to any files. Searching for any IspManagementERP.DbUp.dll..."
+            DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
+            if [ -n "$DBUP_DLL" ]; then
+              DBUP_DIR=$(dirname "$DBUP_DLL")
+              echo "Found DbUp DLL at: $DBUP_DLL but no runtimeconfig.json next to it."
+            fi
+          fi
+
+          if [ -z "${DBUP_DLL:-}" ]; then
             echo "ERROR: IspManagementERP.DbUp.dll not found inside extracted artifact."
+            echo "Contents of artifact_dbup/unzipped_from_zip (full):"
+            find ./artifact_dbup/unzipped_from_zip -type f -print || true
             exit 1
           fi
 
-          echo "Found DbUp DLL at: $DBUP_DLL"
-          DBUP_DIR=$(dirname "$DBUP_DLL")
-          echo "Running dotnet from: $DBUP_DIR (so runtimeconfig.json and deps are present)"
+          echo "Using DBUP_DLL = $DBUP_DLL"
+          echo "Listing directory $DBUP_DIR for inspection:"
           ls -la "$DBUP_DIR" || true
 
+          # Show the main runtime files if present
+          echo "Looking for runtime files next to dll:"
+          for f in "$DBUP_DIR"/IspManagementERP.DbUp.*; do
+            [ -e "$f" ] && echo "  $f"
+          done || true
+
           # Run the dll with dotnet (framework-dependent). The published app should read the connection string from env.
+          echo "Running: dotnet \"$DBUP_DLL\""
           dotnet "$DBUP_DLL"
 
       - name: Deploy web to Azure (production)
