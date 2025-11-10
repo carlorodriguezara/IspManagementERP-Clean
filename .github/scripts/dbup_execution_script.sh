@@ -1,27 +1,63 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "===== dbup_execution_script.sh start ====="
+echo "PWD: $(pwd)"
+echo "Listing artifact_dbup top:"
+ls -la ./artifact_dbup || true
+
 # 1) Buscar si ya fue descomprimido por el job
 DBUP_DLL=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
 DBUP_DIR=""
 
 # 2) Si no está, inspeccionar el zip para localizar la ruta dentro del zip
 if [ -z "$DBUP_DLL" ] && [ -f ./artifact_dbup/dbup-publish.zip ]; then
-  # Obtener la primera ruta del dll dentro del zip (ej: publish/net7.0/publish/IspManagementERP.DbUp.dll)
-  DBUP_DLL_PATH_IN_ZIP=$(unzip -l ./artifact_dbup/dbup-publish.zip | awk '{print $4}' | grep "IspManagementERP.DbUp.dll" | head -n1 || true)
+  echo "Inspecting zip for dll path..."
+  # intentamos listar rutas con unzip -Z1 (si está disponible) o con unzip -l
+  if unzip -Z1 ./artifact_dbup/dbup-publish.zip >/dev/null 2>&1; then
+    DBUP_DLL_PATH_IN_ZIP=$(unzip -Z1 ./artifact_dbup/dbup-publish.zip | grep "IspManagementERP.DbUp.dll" | head -n1 || true)
+  else
+    DBUP_DLL_PATH_IN_ZIP=$(unzip -l ./artifact_dbup/dbup-publish.zip | awk '{print $4}' | grep "IspManagementERP.DbUp.dll" | head -n1 || true)
+  fi
+
+  echo "DBUP_DLL_PATH_IN_ZIP='$DBUP_DLL_PATH_IN_ZIP'"
 
   if [ -n "$DBUP_DLL_PATH_IN_ZIP" ]; then
-    # EXTRAER LA CARPETA que contiene el DLL (no sólo el fichero)
     DIR_IN_ZIP=$(dirname "$DBUP_DLL_PATH_IN_ZIP")
-    echo "Found DBUP DLL inside zip at: $DBUP_DLL_PATH_IN_ZIP"
-    echo "Extracting whole folder inside zip: $DIR_IN_ZIP"
-    mkdir -p ./artifact_dbup/unzipped_from_zip
+    echo "DIR_IN_ZIP='$DIR_IN_ZIP' (will extract this folder's contents)"
+
+    mkdir -p ./artifact_dbup/unzipped_from_zip || true
+
+    # 2a) intentamos extraer por patrón (mantiene carpetas)
     if [ "$DIR_IN_ZIP" = "." ] || [ -z "$DIR_IN_ZIP" ]; then
+      echo "Extracting entire zip because DIR_IN_ZIP is '.' or empty"
       unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped_from_zip || true
     else
-      # Extrae todos los archivos bajo la carpeta que contiene el dll
-      unzip -q ./artifact_dbup/dbup-publish.zip "$DIR_IN_ZIP/*" -d ./artifact_dbup/unzipped_from_zip || true
+      # Primera opción: usar unzip con patrón "DIR_IN_ZIP/*"
+      echo "Trying unzip pattern extraction: unzip dbup-publish.zip \"$DIR_IN_ZIP/*\" -d ./artifact_dbup/unzipped_from_zip"
+      if unzip -q ./artifact_dbup/dbup-publish.zip "$DIR_IN_ZIP/*" -d ./artifact_dbup/unzipped_from_zip 2>/dev/null; then
+        echo "Pattern extraction succeeded"
+      else
+        echo "Pattern extraction failed — falling back to file-list extraction"
+        # Creamos lista exacta de archivos que comienzan por DIR_IN_ZIP/
+        if unzip -Z1 ./artifact_dbup/dbup-publish.zip >/dev/null 2>&1; then
+          LIST=$(unzip -Z1 ./artifact_dbup/dbup-publish.zip | awk -v p="$DIR_IN_ZIP/" 'index($0,p)==1 {print}')
+        else
+          LIST=$(unzip -l ./artifact_dbup/dbup-publish.zip | awk '{print $4}' | awk -v p="$DIR_IN_ZIP/" 'index($0,p)==1 {print}')
+        fi
+
+        if [ -n "$LIST" ]; then
+          echo "Files to extract (count $(echo "$LIST" | wc -l))"
+          echo "$LIST" > /tmp/_dbup_files_to_extract.txt
+          # unzip -@ lee nombres desde stdin y preserva la estructura
+          unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped_from_zip -@ < /tmp/_dbup_files_to_extract.txt || true
+        else
+          echo "No files matched the DIR_IN_ZIP prefix — as last resort extract whole zip"
+          unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped_from_zip || true
+        fi
+      fi
     fi
+
     DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
     DBUP_DIR=$(dirname "$DBUP_DLL" || true)
   fi
@@ -29,7 +65,7 @@ fi
 
 # 3) Si aún no lo encontramos, como último recurso extraer todo
 if [ -z "$DBUP_DLL" ] && [ -f ./artifact_dbup/dbup-publish.zip ]; then
-  echo "No se encontró el DLL en rutas esperadas; descomprimiendo todo el zip como último recurso..."
+  echo "DLL still not found — extracting entire zip as last resort..."
   rm -rf ./artifact_dbup/unzipped_from_zip_full || true
   mkdir -p ./artifact_dbup/unzipped_from_zip_full
   unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped_from_zip_full || true
@@ -41,19 +77,18 @@ fi
 if [ -z "$DBUP_DLL" ]; then
   echo "ERROR: DbUp DLL no encontrado en artifact_dbup; no se pueden ejecutar migraciones."
   echo "Listado artifact_dbup (primeros niveles):"
-  find ./artifact_dbup -maxdepth 3 -type f -print || true
+  find ./artifact_dbup -maxdepth 4 -type f -print || true
   exit 1
 fi
 
 echo "Found DbUp DLL at: $DBUP_DLL"
-# Asegurar DBUP_DIR tiene valor
 if [ -z "${DBUP_DIR:-}" ]; then
   DBUP_DIR=$(dirname "$DBUP_DLL")
 fi
 echo "Running from directory: $DBUP_DIR"
 ls -la "$DBUP_DIR" || true
 
-# 5) Ejecutar desde la carpeta para que runtimeconfig.json / deps / libhost* estén presentes
+# 5) Ejecutar desde la carpeta
 pushd "$DBUP_DIR" > /dev/null || true
 
 if [ -f "./IspManagementERP.DbUp.runtimeconfig.json" ]; then
@@ -61,22 +96,23 @@ if [ -f "./IspManagementERP.DbUp.runtimeconfig.json" ]; then
   dotnet ./IspManagementERP.DbUp.dll
   EXIT_CODE=$?
   popd > /dev/null || true
+  echo "dotnet exit code: $EXIT_CODE"
   exit $EXIT_CODE
 fi
 
-# Si existe ejecutable nativo (self-contained) ejecútalo
 if [ -x "./IspManagementERP.DbUp" ]; then
   echo "Ejecutable nativo encontrado; ejecutando ./IspManagementERP.DbUp"
   chmod +x ./IspManagementERP.DbUp || true
   ./IspManagementERP.DbUp
   EXIT_CODE=$?
   popd > /dev/null || true
+  echo "native exe exit code: $EXIT_CODE"
   exit $EXIT_CODE
 fi
 
-# Fallback final: ejecutar dotnet con la ruta completa al dll (si runner tiene dotnet)
-echo "No runtimeconfig.json ni exe nativo; intentando dotnet con la DLL completa..."
+echo "No runtimeconfig ni exe nativo; intentando dotnet con la DLL completa..."
 dotnet "$DBUP_DLL"
 EXIT_CODE=$?
 popd > /dev/null || true
+echo "dotnet fallback exit code: $EXIT_CODE"
 exit $EXIT_CODE
