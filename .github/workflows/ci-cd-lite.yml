@@ -84,7 +84,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup .NET (optional for diagnostics)
+      - name: Setup .NET (optional diagnostics)
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -106,43 +106,15 @@ jobs:
             echo "No se encontró ./artifact_dbup/dbup-publish.zip — se omiten los checks de DbUp (opcional)"
           fi
 
-      - name: (Opcional) Run DbUp against STAGING/DEV (self-contained)
+      - name: (Opcional) Run DbUp against STAGING/DEV (use script)
         if: ${{ env.AZURE_SQL_CONNECTION_STRING_STAGING != '' }}
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_STAGING }}
         run: |
           set -euo pipefail
-          echo "Optional: run DbUp against STAGING using published self-contained artifact..."
-          if [ -f ./artifact_dbup/dbup-publish.zip ]; then
-            rm -rf ./artifact_dbup/unzipped || true
-            mkdir -p ./artifact_dbup/unzipped
-            unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped || true
-            echo "Listing unzipped files (first 200 entries):"
-            find ./artifact_dbup/unzipped -type f | sed -n '1,200p'
-          else
-            echo "No dbup-publish.zip found - skipping optional staging run."
-            exit 0
-          fi
-
-          # Find native executable (self-contained publish). Name may be 'IspManagementERP.DbUp' (no extension)
-          EXE=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp" -perm /111 -print -quit || true)
-          if [ -z "$EXE" ]; then
-            EXE_DLL=$(find ./artifact_dbup/unzipped -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
-            if [ -n "$EXE_DLL" ]; then
-              echo "Found DLL fallback: $EXE_DLL"
-              echo "Running with dotnet..."
-              dotnet "$EXE_DLL"
-              exit 0
-            fi
-            echo "ERROR: No executable or dll found inside unzipped artifact for staging run."
-            exit 1
-          fi
-
-          echo "Found self-contained DbUp executable: $EXE"
-          chmod +x "$EXE" || true
-          echo "Running: $EXE"
-          # The app will read ConnectionStrings__DefaultConnection from env
-          "$EXE"
+          echo "Optional: run DbUp against STAGING using the helper script..."
+          chmod +x .github/scripts/dbup_execution_script.sh || true
+          ./.github/scripts/dbup_execution_script.sh
 
   deploy_to_prod:
     needs: predeploy_checks
@@ -176,61 +148,19 @@ jobs:
           set -euo pipefail
           echo "dotnet --info"
           dotnet --info || true
-          echo "List artifact_dbup contents (top):"
+          echo "List artifact_web top:"
+          ls -la ./artifact_web || true
+          echo "List artifact_dbup top:"
           ls -la ./artifact_dbup || true
-          if [ -f ./artifact_dbup/dbup-publish.zip ]; then
-            echo "dbup-publish.zip exists"
-          else
-            echo "dbup-publish.zip NOT found"
-          fi
 
-      - name: Run DbUp migrations on PROD (self-contained)
+      - name: Run DbUp migrations (use script)
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_PROD }}
         run: |
           set -euo pipefail
-          echo "Preparing to run self-contained DbUp on PROD..."
-          rm -rf ./artifact_dbup/unzipped_from_zip || true
-          mkdir -p ./artifact_dbup/unzipped_from_zip
-
-          if [ -f ./artifact_dbup/dbup-publish.zip ]; then
-            unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped_from_zip || true
-          else
-            echo "ERROR: ./artifact_dbup/dbup-publish.zip not found. Listing artifact_dbup:"
-            ls -la ./artifact_dbup || true
-            exit 1
-          fi
-
-          echo "Listing extracted files (first 300 entries):"
-          find ./artifact_dbup/unzipped_from_zip -type f | sed -n '1,300p' || true
-          echo "---- end list ----"
-
-          # Try to find the self-contained native executable first
-          EXE=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp" -perm /111 -print -quit || true)
-
-          if [ -n "$EXE" ]; then
-            echo "Found self-contained executable: $EXE"
-            chmod +x "$EXE" || true
-            echo "Running native executable..."
-            ConnectionStrings__DefaultConnection="${ConnectionStrings__DefaultConnection}" "$EXE"
-            exit 0
-          fi
-
-          # Fallback: try to find the DLL and run with dotnet
-          DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" -print -quit || true)
-          if [ -n "$DBUP_DLL" ]; then
-            echo "Found fallback DLL: $DBUP_DLL"
-            DBUP_DIR=$(dirname "$DBUP_DLL")
-            echo "Running with dotnet from directory: $DBUP_DIR"
-            pushd "$DBUP_DIR" > /dev/null || true
-            echo "dotnet \"${DBUP_DLL##*/}\""
-            dotnet "${DBUP_DLL##*/}" || true
-            popd > /dev/null || true
-            exit 0
-          fi
-
-          echo "ERROR: No DbUp executable or DLL found in artifact. See listing above."
-          exit 1
+          echo "Running DbUp via helper script..."
+          chmod +x .github/scripts/dbup_execution_script.sh || true
+          ./.github/scripts/dbup_execution_script.sh
 
       - name: Find and set WEB package path
         run: |
