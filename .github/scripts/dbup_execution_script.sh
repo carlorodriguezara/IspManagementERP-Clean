@@ -11,7 +11,7 @@ if [ -z "$DBUP_DLL" ] && [ -f ./artifact_dbup/dbup-publish.zip ]; then
   DBUP_DLL_PATH_IN_ZIP=$(unzip -l ./artifact_dbup/dbup-publish.zip | awk '{print $4}' | grep "IspManagementERP.DbUp.dll" | head -n1 || true)
 
   if [ -n "$DBUP_DLL_PATH_IN_ZIP" ]; then
-    # Extraer la CARPETA que contiene el DLL (no sólo el fichero)
+    # EXTRAER LA CARPETA que contiene el DLL (no sólo el fichero)
     DIR_IN_ZIP=$(dirname "$DBUP_DLL_PATH_IN_ZIP")
     echo "Found DBUP DLL inside zip at: $DBUP_DLL_PATH_IN_ZIP"
     echo "Extracting whole folder inside zip: $DIR_IN_ZIP"
@@ -19,7 +19,7 @@ if [ -z "$DBUP_DLL" ] && [ -f ./artifact_dbup/dbup-publish.zip ]; then
     if [ "$DIR_IN_ZIP" = "." ] || [ -z "$DIR_IN_ZIP" ]; then
       unzip -q ./artifact_dbup/dbup-publish.zip -d ./artifact_dbup/unzipped_from_zip || true
     else
-      # unzip acepta el patrón "folder/*" para extraer todos los ficheros de esa carpeta
+      # Extrae todos los archivos bajo la carpeta que contiene el dll
       unzip -q ./artifact_dbup/dbup-publish.zip "$DIR_IN_ZIP/*" -d ./artifact_dbup/unzipped_from_zip || true
     fi
     DBUP_DLL=$(find ./artifact_dbup/unzipped_from_zip -type f -name "IspManagementERP.DbUp.dll" 2>/dev/null | head -n1 || true)
@@ -40,17 +40,17 @@ fi
 # 4) Si no hay DLL -> error
 if [ -z "$DBUP_DLL" ]; then
   echo "ERROR: DbUp DLL no encontrado en artifact_dbup; no se pueden ejecutar migraciones."
-  echo "Listado artifact_dbup:"
+  echo "Listado artifact_dbup (primeros niveles):"
   find ./artifact_dbup -maxdepth 3 -type f -print || true
   exit 1
 fi
 
 echo "Found DbUp DLL at: $DBUP_DLL"
-echo "Running from directory: ${DBUP_DIR:-$(dirname "$DBUP_DLL")}"
 # Asegurar DBUP_DIR tiene valor
-if [ -z "$DBUP_DIR" ]; then
+if [ -z "${DBUP_DIR:-}" ]; then
   DBUP_DIR=$(dirname "$DBUP_DLL")
 fi
+echo "Running from directory: $DBUP_DIR"
 ls -la "$DBUP_DIR" || true
 
 # 5) Ejecutar desde la carpeta para que runtimeconfig.json / deps / libhost* estén presentes
